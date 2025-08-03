@@ -1,0 +1,204 @@
+{
+  "info": {
+    "name": "Cardata Lookup - Testing API",
+    "description": "API endpoints for testing folder and vehicle data retrieval functionality",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/testing"
+    },
+    {
+      "key": "folderId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": "507f1f77bcf86cd799439011"
+    }
+  ],
+  "item": [
+    {
+      "name": "Folders",
+      "item": [
+        {
+          "name": "Create Folder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ownerId\": \"{{userId}}\",\n  \"vehicle\": {\n    \"registrationNumber\": \"ABC123456\",\n    \"plateNumber\": \"XYZ789\",\n    \"brand\": \"Toyota\",\n    \"model\": \"Corolla\",\n    \"year\": 2020\n  },\n  \"seller\": {\n    \"identificationNumber\": \"12345678\",\n    \"name\": \"Juan Pérez\",\n    \"dateOfBirth\": \"1985-03-15\"\n  },\n  \"buyer\": {\n    \"identificationNumber\": \"87654321\",\n    \"name\": \"María García\",\n    \"dateOfBirth\": \"1990-07-22\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/folders",
+              "host": ["{{baseUrl}}"],
+              "path": ["folders"]
+            }
+          }
+        },
+        {
+          "name": "Get User Folders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/folders?userId={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["folders"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Folder by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/folders?folderId={{folderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["folders"],
+              "query": [
+                {
+                  "key": "folderId",
+                  "value": "{{folderId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Folders by Vehicle Registration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/folders?registrationNumber=ABC123456",
+              "host": ["{{baseUrl}}"],
+              "path": ["folders"],
+              "query": [
+                {
+                  "key": "registrationNumber",
+                  "value": "ABC123456"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Folders by Person Identification",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/folders?identificationNumber=12345678",
+              "host": ["{{baseUrl}}"],
+              "path": ["folders"],
+              "query": [
+                {
+                  "key": "identificationNumber",
+                  "value": "12345678"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Multiple Folders (Same Vehicle)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ownerId\": \"{{userId}}\",\n  \"vehicle\": {\n    \"registrationNumber\": \"ABC123456\",\n    \"plateNumber\": \"DEF456\",\n    \"brand\": \"Toyota\",\n    \"model\": \"Corolla\",\n    \"year\": 2020\n  },\n  \"seller\": {\n    \"identificationNumber\": \"11111111\",\n    \"name\": \"Carlos López\",\n    \"dateOfBirth\": \"1975-12-10\"\n  },\n  \"buyer\": {\n    \"identificationNumber\": \"22222222\",\n    \"name\": \"Ana Rodríguez\",\n    \"dateOfBirth\": \"1988-05-18\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/folders",
+              "host": ["{{baseUrl}}"],
+              "path": ["folders"]
+            }
+          }
+        },
+        {
+          "name": "Delete Folder",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/folders?folderId={{folderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["folders"],
+              "query": [
+                {
+                  "key": "folderId",
+                  "value": "{{folderId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicle Data Retrieval",
+      "item": [
+        {
+          "name": "Generate Infractions Data Retrieval",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"folderId\": \"{{folderId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/scraping/infracciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraping", "infracciones"]
+            }
+          }
+        },
+        {
+          "name": "Get Infractions Data Retrieval Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/scraping/infracciones?folderId={{folderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraping", "infracciones"],
+              "query": [
+                {
+                  "key": "folderId",
+                  "value": "{{folderId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+} 

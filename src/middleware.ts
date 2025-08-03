@@ -2,11 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { AUTH_ROUTES } from './constants/authRoutes';
 import { getLoginRoute } from './constants/navigationRoutes';
+import { TESTING_BASE_PATH, isTestingEnabled } from './constants/testingRoutes';
 
 const authRoutes = AUTH_ROUTES;
 
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+  
+  // Skip middleware for testing routes ONLY in development
+  if (isTestingEnabled() && path.startsWith(TESTING_BASE_PATH)) {
+    return NextResponse.next();
+  }
+  
   const isAuthPath = authRoutes.some((route) => path.startsWith(route));
   const secret = process.env.NEXTAUTH_SECRET || "";
   const isLoggedIn = await getToken({ req, secret, cookieName: 'next-auth.session-token' });

@@ -3,21 +3,24 @@ import { PPerson, PPersonPrev } from "./PPerson";
 
 export interface PFolder {
     id: string;
-    ownerId: string;
+    ownerId: string; // User who owns this folder
     vehicle: PVehicle;
-    buyer: PPerson;
-    seller: PPerson;
-    buyerExtraData?: {};
-    sellerExtraData?: {};
+    seller: PPerson; // Person selling the vehicle
+    buyer: PPerson; // Person buying the vehicle
     createdAt: Date;
     updatedAt: Date;
 }
 
-
 export interface PFolderPrev {
     id: string;
     ownerId: string;
-    vehiclePrev: PVehiclePrev;
-    buyerPrev: PPersonPrev;
-    sellerPrev: PPersonPrev;
+    vehicle: {
+        brand: string;
+        model: string;
+        year: number;
+        registrationNumber: string;
+        plateNumber: string;
+    };
+    buyerName: string;
+    lastUpdated: string; // ISO date string
 }

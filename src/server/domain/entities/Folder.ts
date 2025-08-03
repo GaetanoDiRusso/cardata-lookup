@@ -1,15 +1,14 @@
 import { Person, PersonPrev } from "./Person";
 import { Vehicle, VehiclePrev } from "./Vehicle";
 import { PFolder, PFolderPrev } from "@/models/PFolder";
+
 export class Folder {
     constructor(
         readonly id: string,
-        readonly ownerId: string,
+        readonly ownerId: string, // User who owns this folder
         readonly vehicle: Vehicle,
-        readonly buyer: Person,
-        readonly seller: Person,
-        readonly buyerExtraData: {},
-        readonly sellerExtraData: {},
+        readonly seller: Person, // Person selling the vehicle
+        readonly buyer: Person, // Person buying the vehicle
         readonly createdAt: Date,
         readonly updatedAt: Date,
     ) {}
@@ -19,10 +18,8 @@ export class Folder {
             id: this.id,
             ownerId: this.ownerId,
             vehicle: this.vehicle.toPresentation(),
-            buyer: this.buyer.toPresentation(),
             seller: this.seller.toPresentation(),
-            buyerExtraData: this.buyerExtraData,
-            sellerExtraData: this.sellerExtraData,
+            buyer: this.buyer.toPresentation(),
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
         }
@@ -33,18 +30,24 @@ export class FolderPrev {
     constructor(
         readonly id: string,
         readonly ownerId: string,
-        readonly vehiclePrev: VehiclePrev,
-        readonly buyerPrev: PersonPrev,
-        readonly sellerPrev: PersonPrev,
+        readonly vehicle: Vehicle,
+        readonly buyer: Person,
+        readonly createdAt: Date,
     ) {}
 
     toPresentation(): PFolderPrev {
         return {
             id: this.id,
             ownerId: this.ownerId,
-            vehiclePrev: this.vehiclePrev.toPresentation(),
-            buyerPrev: this.buyerPrev.toPresentation(),
-            sellerPrev: this.sellerPrev.toPresentation(),
+            vehicle: {
+                brand: this.vehicle.vehicleData.brand,
+                model: this.vehicle.vehicleData.model,
+                year: this.vehicle.vehicleData.year,
+                registrationNumber: this.vehicle.vehicleData.registrationNumber,
+                plateNumber: this.vehicle.vehicleData.plateNumber,
+            },
+            buyerName: this.buyer.name,
+            lastUpdated: this.createdAt.toISOString().split('T')[0], // Format as YYYY-MM-DD
         }
     }
 }

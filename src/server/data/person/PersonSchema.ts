@@ -3,9 +3,15 @@ import { Person, PersonPrev } from '@/server/domain/entities/Person';
 import mongoose from 'mongoose';
 
 const PersonSchema = new mongoose.Schema({
+    folderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Folder',
+        required: false, // Optional - will be updated after folder creation
+    },
     identificationNumber: {
         type: String,
         required: [true, 'Please provide the identification number'],
+        // Not unique - same person can appear in multiple folders
     },
     name: {
         type: String,
@@ -15,10 +21,10 @@ const PersonSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide the date of birth'],
     },
-    folderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Folder',
-        required: false, // This is because we need to create the person before the folder
+    role: {
+        type: String,
+        enum: ['seller', 'buyer'],
+        required: [true, 'Please specify the role in this folder'],
     },
     createdAt: {
         type: Date,
@@ -30,8 +36,11 @@ const PersonSchema = new mongoose.Schema({
     },
 });
 
-// Create a compound unique index on identificationNumber and folderId
-PersonSchema.index({ identificationNumber: 1, folderId: 1 }, { unique: true });
+// Create a compound index on identificationNumber, folderId, and role to ensure uniqueness per folder
+PersonSchema.index({ identificationNumber: 1, folderId: 1, role: 1 }, { unique: true });
+
+// Create an index on identificationNumber to easily find all instances of the same person
+PersonSchema.index({ identificationNumber: 1 });
 
 export const PersonSchemaToDomain = (person: any): Person => {
     return new Person(
@@ -46,6 +55,7 @@ export const PersonSchemaToPrevDomain = (person: any): PersonPrev => {
     return new PersonPrev(
         person._id.toString(),
         person.name,
+        person.identificationNumber,
     )
 }
 

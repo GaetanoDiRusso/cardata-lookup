@@ -15,21 +15,15 @@ const FolderSchema = new mongoose.Schema({
     ref: 'Vehicle',
     required: [true, 'Please provide the vehicle id'],
   },
-  buyer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Person',
-    required: [true, 'Please provide the buyer id'],
-  },
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Person',
     required: [true, 'Please provide the seller id'],
   },
-  buyerExtraData: {
-    type: Object,
-  },
-  sellerExtraData: {
-    type: Object,
+  buyer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Person',
+    required: [true, 'Please provide the buyer id'],
   },
   createdAt: {
     type: Date,
@@ -43,28 +37,31 @@ const FolderSchema = new mongoose.Schema({
 
 export const FolderSchemaToDomain = (folder: any): Folder => {
   const vehicle = VehicleSchemaToDomain(folder.vehicle)
-  const buyer = PersonSchemaToDomain(folder.buyer)
   const seller = PersonSchemaToDomain(folder.seller)
+  const buyer = PersonSchemaToDomain(folder.buyer)
 
   return new Folder(
     folder._id.toString(),
     folder.ownerId.toString(),
     vehicle,
-    buyer,
     seller,
-    folder.buyerExtraData,
-    folder.sellerExtraData,
+    buyer,
     folder.createdAt,
     folder.updatedAt,
   )
 }
 
 export const FolderSchemaToPrevDomain = (folder: any): FolderPrev => {
-  const vehicle = VehicleSchemaToPrevDomain(folder.vehicle)
-  const buyer = PersonSchemaToPrevDomain(folder.buyer)
-  const seller = PersonSchemaToPrevDomain(folder.seller)
+  const vehicle = VehicleSchemaToDomain(folder.vehicle)
+  const buyer = PersonSchemaToDomain(folder.buyer)
 
-  return new FolderPrev(folder._id.toString(), folder.ownerId.toString(), vehicle, buyer, seller)
+  return new FolderPrev(
+    folder._id.toString(), 
+    folder.ownerId.toString(), 
+    vehicle, 
+    buyer,
+    folder.createdAt,
+  )
 }
 
 export default mongoose.models.Folder || mongoose.model('Folder', FolderSchema);

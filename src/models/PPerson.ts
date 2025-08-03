@@ -1,6 +1,6 @@
 export interface PPerson {
     id: string;
-    identificationNumber: string;
+    identificationNumber: string; // Unique identifier that never changes
     name: string;
     dateOfBirth: string;
 }
@@ -8,4 +8,5 @@ export interface PPerson {
 export interface PPersonPrev {
     id: string;
     name: string;
+    identificationNumber: string;
 }

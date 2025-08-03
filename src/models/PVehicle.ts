@@ -1,29 +1,16 @@
 export interface PVehicle {
-    id: string,
-    plateNumber: string;
-    registrationNumber: string;
-    department: string;
+    id: string;
+    registrationNumber: string; // Unique identifier that never changes
+    plateNumber: string; // Can change over time
     brand: string;
     model: string;
     year: number;
-    type: string;
-    cylinders: number;
-    fuel: string;
-    attribute: string;
-    engineCapacity: number;
-    totalWeight: number;
-    engineNumber: string;
-    chassisNumber: string;
-    axles: number;
-    passengers: number;
-    ownerName: string;
-    ownerIdentification: string;
 }
 
 export interface PVehiclePrev {
-    id: string,
-    plateNumber: string;
+    id: string;
     registrationNumber: string;
+    plateNumber: string;
     brand: string;
     model: string;
     year: number;

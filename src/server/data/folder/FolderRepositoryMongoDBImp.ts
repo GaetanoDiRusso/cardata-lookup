@@ -5,23 +5,61 @@ import { ICreateFolderData, IFolderRepository } from '@/server/domain/interfaces
 import { connectDB } from '../mongodb'
 import { FolderPrev, Folder } from '@/server/domain/entities/Folder'
 import mongoose from 'mongoose'
-import { Person } from '@/server/domain/entities/Person'
 
 export class FolderRepositoryMongoDBImp implements IFolderRepository {
   async findAllPrevByUserId(userId: string): Promise<FolderPrev[]> {
     await connectDB()
-    const folders = await FolderSchema.find({ userId })
+    const folders = await FolderSchema.find({ ownerId: userId })
+      .populate('vehicle')
+      .populate('buyer')
+      .populate('seller')
     return folders.map(FolderSchemaToPrevDomain)
   }
+
   async findByFolderId(folderId: string): Promise<Folder | null> {
     await connectDB()
     const folder = await FolderSchema.findById(folderId)
+      .populate('vehicle')
+      .populate('buyer')
+      .populate('seller')
     return folder ? FolderSchemaToDomain(folder) : null
+  }
+
+  async findByVehicleRegistration(registrationNumber: string): Promise<FolderPrev[]> {
+    await connectDB()
+    const vehicles = await VehicleSchema.find({ registrationNumber })
+      .populate({
+        path: 'folderId',
+        populate: [
+          { path: 'vehicle' },
+          { path: 'buyer' },
+          { path: 'seller' }
+        ]
+      })
+    
+    const folders = vehicles.map(v => v.folderId).filter(Boolean)
+    return folders.map(FolderSchemaToPrevDomain)
+  }
+
+  async findByPersonIdentification(identificationNumber: string): Promise<FolderPrev[]> {
+    await connectDB()
+    const people = await PersonSchema.find({ identificationNumber })
+      .populate({
+        path: 'folderId',
+        populate: [
+          { path: 'vehicle' },
+          { path: 'buyer' },
+          { path: 'seller' }
+        ]
+      })
+    
+    const folders = people.map(p => p.folderId).filter(Boolean)
+    return folders.map(FolderSchemaToPrevDomain)
   }
 
   /**
    * Create a new folder.
-   * Also creates the vehicle, buyer and seller.
+   * Creates vehicle and people entries for this specific folder.
    * @param folder - The folder to create with the vehicle, buyer and seller data
    * @returns The created folder
    */
@@ -36,36 +74,58 @@ export class FolderRepositoryMongoDBImp implements IFolderRepository {
         // Start the transaction
         session.startTransaction()
 
-        // Create the vehicle.
-        // Note that the vehicle is not reusable, it is created for each folder.
-        const vehicle = await VehicleSchema.create([folder.vehicle], { session })
+        // Step 1: Create the vehicle (without folderId)
+        const vehicle = await VehicleSchema.create([{
+          ...folder.vehicle,
+          // folderId will be updated after folder creation
+        }], { session })
 
-        // Create the buyer
-        // Note that the buyer is not reusable, it is created for each folder.
-        const buyer = await PersonSchema.create([folder.buyer], { session })
+        // Step 2: Create the buyer (without folderId)
+        const buyer = await PersonSchema.create([{
+          ...folder.buyer,
+          role: 'buyer',
+          // folderId will be updated after folder creation
+        }], { session })
 
-        // Create the seller
-        // Note that the seller is not reusable, it is created for each folder.
-        const seller = await PersonSchema.create([folder.seller], { session })
+        // Step 3: Create the seller (without folderId)
+        const seller = await PersonSchema.create([{
+          ...folder.seller,
+          role: 'seller',
+          // folderId will be updated after folder creation
+        }], { session })
         
-        // Create the folder with references to the created entities
-        const result = await FolderSchema.create([{
+        // Step 4: Create the folder with references to the created entities
+        const folderDoc = await FolderSchema.create([{
           ownerId: folder.ownerId,
           vehicle: vehicle[0]._id,
           buyer: buyer[0]._id,
           seller: seller[0]._id,
         }], { session })
 
-        // Update the vehicle, buyer and seller with the folder id
-        await VehicleSchema.updateOne({ _id: vehicle[0]._id }, { $set: { folderId: result[0]._id } }, { session })
-        await PersonSchema.updateOne({ _id: buyer[0]._id }, { $set: { folderId: result[0]._id } }, { session })
-        await PersonSchema.updateOne({ _id: seller[0]._id }, { $set: { folderId: result[0]._id } }, { session })
+        const folderId = folderDoc[0]._id
+
+        // Step 5: Update the vehicle, buyer, and seller with the folder id
+        await VehicleSchema.updateOne(
+          { _id: vehicle[0]._id }, 
+          { $set: { folderId: folderId } }, 
+          { session }
+        )
+        await PersonSchema.updateOne(
+          { _id: buyer[0]._id }, 
+          { $set: { folderId: folderId } }, 
+          { session }
+        )
+        await PersonSchema.updateOne(
+          { _id: seller[0]._id }, 
+          { $set: { folderId: folderId } }, 
+          { session }
+        )
         
         // Commit the transaction
         await session.commitTransaction()
         
         // Populate the references to get the full data
-        const populatedFolder = await FolderSchema.findById(result[0]._id)
+        const populatedFolder = await FolderSchema.findById(folderId)
           .populate('vehicle')
           .populate('buyer')
           .populate('seller')
@@ -87,6 +147,32 @@ export class FolderRepositoryMongoDBImp implements IFolderRepository {
 
   async delete(folderId: string): Promise<void> {
     await connectDB()
-    await FolderSchema.findByIdAndDelete(folderId)
+    
+    // Start a new session for the transaction
+    const session = await mongoose.startSession()
+
+    try {
+      // Start the transaction
+      session.startTransaction()
+
+      // Delete the folder
+      await FolderSchema.findByIdAndDelete(folderId, { session })
+      
+      // Delete the vehicle for this folder
+      await VehicleSchema.deleteMany({ folderId }, { session })
+      
+      // Delete the people for this folder
+      await PersonSchema.deleteMany({ folderId }, { session })
+      
+      // Commit the transaction
+      await session.commitTransaction()
+    } catch (error) {
+      // If an error occurs, abort the transaction
+      await session.abortTransaction()
+      throw error
+    } finally {
+      // End the session
+      session.endSession()
+    }
   }
 } 

@@ -14,24 +14,11 @@ export class Vehicle {
     toPresentation(): PVehicle {
         return {
             id: this.id,
-            plateNumber: this.vehicleData.plateNumber,
             registrationNumber: this.vehicleData.registrationNumber,
-            department: this.vehicleData.department,
+            plateNumber: this.vehicleData.plateNumber,
             brand: this.vehicleData.brand,
             model: this.vehicleData.model,
             year: this.vehicleData.year,
-            type: this.vehicleData.type,
-            cylinders: this.vehicleData.cylinders,
-            fuel: this.vehicleData.fuel,
-            attribute: this.vehicleData.attribute,
-            engineCapacity: this.vehicleData.engineCapacity,
-            totalWeight: this.vehicleData.totalWeight,
-            engineNumber: this.vehicleData.engineNumber,
-            chassisNumber: this.vehicleData.chassisNumber,
-            axles: this.vehicleData.axles,
-            passengers: this.vehicleData.passengers,
-            ownerName: this.vehicleData.ownerName,
-            ownerIdentification: this.vehicleData.ownerIdentification,
         }
     }
 }
@@ -50,8 +37,8 @@ export class VehiclePrev {
     toPresentation(): PVehiclePrev {
         return {
             id: this.id,
-            plateNumber: this.vehicleDataPrev.plateNumber,
             registrationNumber: this.vehicleDataPrev.registrationNumber,
+            plateNumber: this.vehicleDataPrev.plateNumber,
             brand: this.vehicleDataPrev.brand,
             model: this.vehicleDataPrev.model,
             year: this.vehicleDataPrev.year,
