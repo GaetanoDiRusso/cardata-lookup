@@ -19,7 +19,11 @@ export async function GET(request: NextRequest) {
 
     if (folderId) {
       // Get specific folder
-      const folder = await folderUseCase.findFolderById(folderId);
+      const folder = await folderUseCase.findFolderById({
+        folderId,
+      }, {
+        userId: userId!,
+      });
       if (!folder) {
         return NextResponse.json({ error: 'Folder not found' }, { status: 404 });
       }
@@ -28,19 +32,31 @@ export async function GET(request: NextRequest) {
 
     if (userId) {
       // Get user's folders
-      const folders = await folderUseCase.findFoldersPrevByUserId(userId);
+      const folders = await folderUseCase.findFoldersPrevByUserId({
+        userId,
+      }, {
+        userId: userId!,
+      });
       return NextResponse.json(folders.map(f => f.toPresentation()));
     }
 
     if (registrationNumber) {
       // Get folders by vehicle registration
-      const folders = await folderUseCase.findFoldersByVehicleRegistration(registrationNumber);
+      const folders = await folderUseCase.findFoldersByVehicleRegistration({
+        registrationNumber,
+      }, {
+        userId: userId!,
+      });
       return NextResponse.json(folders.map(f => f.toPresentation()));
     }
 
     if (identificationNumber) {
       // Get folders by person identification
-      const folders = await folderUseCase.findFoldersByPersonIdentification(identificationNumber);
+      const folders = await folderUseCase.findFoldersByPersonIdentification({
+        identificationNumber,
+      }, {
+        userId: userId!,
+      });
       return NextResponse.json(folders.map(f => f.toPresentation()));
     }
 
@@ -93,24 +109,27 @@ export async function POST(request: NextRequest) {
     }
 
     const folder = await folderUseCase.createFolder({
-      ownerId,
-      vehicle: {
-        registrationNumber,
-        plateNumber,
-        brand,
-        model,
-        year,
-      },
-      seller: {
-        identificationNumber: sellerId,
-        name: sellerName,
-        dateOfBirth: sellerDob,
-      },
-      buyer: {
-        identificationNumber: buyerId,
-        name: buyerName,
-        dateOfBirth: buyerDob,
-      },
+      folder: {
+        vehicle: {
+          registrationNumber,
+          plateNumber,
+          brand,
+          model,
+          year,
+        },
+        seller: {
+          identificationNumber: sellerId,
+          name: sellerName,
+          dateOfBirth: sellerDob,
+        },
+        buyer: {
+          identificationNumber: buyerId,
+          name: buyerName,
+          dateOfBirth: buyerDob,
+        },
+      }
+    }, {
+      userId: ownerId,
     });
 
     return NextResponse.json(folder.toPresentation(), { status: 201 });
@@ -129,11 +148,20 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const folderId = searchParams.get('folderId');
 
+    const body = await request.json();
+    
+    // Validate required fields
+    const { ownerId } = body;
+
     if (!folderId) {
       return NextResponse.json({ error: 'Missing folderId parameter' }, { status: 400 });
     }
 
-    await folderUseCase.deleteFolder(folderId);
+    await folderUseCase.deleteFolder({
+      folderId,
+    }, {
+      userId: ownerId,
+    });
     return NextResponse.json({ message: 'Folder deleted successfully' });
   } catch (error) {
     console.error('Error in DELETE /api/testing/folders:', error);

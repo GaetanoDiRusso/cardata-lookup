@@ -53,6 +53,7 @@ Vehicle Data Retrieval Collection:
 - ✅ **Vehicle data retrieval** is synchronous (30-40 seconds)
 - ✅ **Multiple retrieval types** supported (infracciones, deuda, etc.)
 - ✅ **Vehicle data consistency** - retrieved from folder's vehicle information
+- ✅ **Folder details include** all associated vehicle data retrievals (full objects)
 
 ## 🚀 API Endpoints
 
@@ -68,7 +69,7 @@ http://localhost:3000/api/testing
 |--------|----------|-------------|-------------|
 | `POST` | `/api/testing/folders` | Create a new folder | Development Only |
 | `GET` | `/api/testing/folders?userId={id}` | Get user's folders | Development Only |
-| `GET` | `/api/testing/folders?folderId={id}` | Get specific folder | Development Only |
+| `GET` | `/api/testing/folders?folderId={id}` | Get specific folder (with full vehicle data retrievals) | Development Only |
 | `GET` | `/api/testing/folders?registrationNumber={num}` | Get folders by vehicle | Development Only |
 | `GET` | `/api/testing/folders?identificationNumber={num}` | Get folders by person | Development Only |
 | `DELETE` | `/api/testing/folders?folderId={id}` | Delete a folder | Development Only |
@@ -111,7 +112,7 @@ The collection uses these variables:
 ##### 3. Get Folder by ID
 - **Method**: GET
 - **Endpoint**: `/api/testing/folders?folderId={{folderId}}`
-- **Expected**: Complete folder details
+- **Expected**: Complete folder details with full vehicle data retrievals
 
 ##### 4. Get Folders by Vehicle
 - **Method**: GET
@@ -180,10 +181,13 @@ curl -X POST http://localhost:3000/api/testing/folders \
 # 2. Get user folders
 curl "http://localhost:3000/api/testing/folders?userId=507f1f77bcf86cd799439011"
 
-# 3. Get folders by vehicle
+# 3. Get specific folder (with full vehicle data retrievals)
+curl "http://localhost:3000/api/testing/folders?folderId=folder_id_here"
+
+# 4. Get folders by vehicle
 curl "http://localhost:3000/api/testing/folders?registrationNumber=ABC123456"
 
-# 4. Get folders by person
+# 5. Get folders by person
 curl "http://localhost:3000/api/testing/folders?identificationNumber=12345678"
 ```
 
@@ -243,6 +247,54 @@ curl "http://localhost:3000/api/testing/scraping/infracciones?folderId=folder_id
     "name": "María García",
     "dateOfBirth": "1990-07-22"
   }
+}
+```
+
+#### Sample Folder Response (with full vehicle data retrievals)
+```json
+{
+  "id": "507f1f77bcf86cd799439011",
+  "ownerId": "507f1f77bcf86cd799439011",
+  "vehicle": {
+    "id": "507f1f77bcf86cd799439012",
+    "registrationNumber": "ABC123456",
+    "plateNumber": "XYZ789",
+    "brand": "Toyota",
+    "model": "Corolla",
+    "year": 2020
+  },
+  "seller": {
+    "id": "507f1f77bcf86cd799439013",
+    "identificationNumber": "12345678",
+    "name": "Juan Pérez",
+    "dateOfBirth": "1985-03-15"
+  },
+  "buyer": {
+    "id": "507f1f77bcf86cd799439014",
+    "identificationNumber": "87654321",
+    "name": "María García",
+    "dateOfBirth": "1990-07-22"
+  },
+  "vehicleDataRetrievals": [
+    {
+      "id": "507f1f77bcf86cd799439015",
+      "folderId": "507f1f77bcf86cd799439011",
+      "dataRetrievalType": "infracciones",
+      "status": "completed",
+      "data": {
+        "hasInfractions": true
+      },
+      "imageUrls": ["https://example.com/screenshots/infractions-screenshot.png"],
+      "pdfUrls": ["https://example.com/pdfs/infractions-report.pdf"],
+      "videoUrls": ["https://example.com/videos/infractions-recording.mp4"],
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "startedAt": "2024-01-01T00:00:00.000Z",
+      "completedAt": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
 }
 ```
 
@@ -408,4 +460,4 @@ src/
 ---
 
 **Last Updated**: December 2024
-**Version**: 2.0.0 
+**Version**: 2.2.0 

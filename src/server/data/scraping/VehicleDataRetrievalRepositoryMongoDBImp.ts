@@ -29,6 +29,11 @@ export class VehicleDataRetrievalRepositoryMongoDBImp implements IVehicleDataRet
     return result ? VehicleDataRetrievalSchemaToDomain(result) : null;
   }
 
+  async findAllByFolderId(folderId: string): Promise<VehicleDataRetrieval[]> {
+    const results = await VehicleDataRetrievalModel.find({ folderId }).sort({ createdAt: -1 });
+    return results.map(VehicleDataRetrievalSchemaToDomain);
+  }
+
   async findAllPrevByFolderId(folderId: string): Promise<VehicleDataRetrievalPrev[]> {
     const results = await VehicleDataRetrievalModel.find({ folderId }).sort({ createdAt: -1 });
     return results.map(VehicleDataRetrievalSchemaToPrevDomain);

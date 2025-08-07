@@ -1,8 +1,11 @@
 import { Person, PersonPrev } from "./Person";
 import { Vehicle, VehiclePrev } from "./Vehicle";
 import { PFolder, PFolderPrev } from "@/models/PFolder";
+import { VehicleDataRetrieval } from "./VehicleDataRetrieval";
 
 export class Folder {
+    private vehicleDataRetrievals: VehicleDataRetrieval[] = [];
+
     constructor(
         readonly id: string,
         readonly ownerId: string, // User who owns this folder
@@ -20,9 +23,15 @@ export class Folder {
             vehicle: this.vehicle.toPresentation(),
             seller: this.seller.toPresentation(),
             buyer: this.buyer.toPresentation(),
+            vehicleDataRetrievals: this.vehicleDataRetrievals.map(retrieval => retrieval.toPresentation()),
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
         }
+    }
+
+    setVehicleDataRetrievals(vehicleDataRetrievals: VehicleDataRetrieval[]): Folder {
+        this.vehicleDataRetrievals = vehicleDataRetrievals;
+        return this;
     }
 }
 

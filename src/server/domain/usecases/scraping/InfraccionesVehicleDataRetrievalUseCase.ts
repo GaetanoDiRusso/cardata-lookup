@@ -2,12 +2,29 @@ import { VehicleDataRetrievalUseCases } from './VehicleDataRetrievalUseCases';
 import { VehicleDataRetrievalType } from '@/models/PScrapingResult';
 import { FolderUseCases } from '../folder/FolderUseCases';
 import { VehicleDataRetrieval, VehicleDataRetrievalPrev } from '../../entities/VehicleDataRetrieval';
+import { ICurrentUserContext } from '../../interfaces/ICurrentUserContext';
 
 export interface InfractionsVehicleDataRetrievalData {
   hasInfractions: boolean;
 }
 
-export interface InfractionsVehicleDataRetrievalRequest {
+export interface GenerateInfractionsVehicleDataRetrievalParams {
+  folderId: string;
+}
+
+export interface GetInfractionsVehicleDataRetrievalResultParams {
+  folderId: string;
+}
+
+export interface GetInfractionsVehicleDataRetrievalStatusParams {
+  folderId: string;
+}
+
+export interface GetInfractionsVehicleDataRetrievalByIdParams {
+  id: string;
+}
+
+export interface GetInfractionsVehicleDataRetrievalsPrevByFolderIdParams {
   folderId: string;
 }
 
@@ -17,11 +34,11 @@ export class InfractionsVehicleDataRetrievalUseCase {
     private readonly folderUseCases: FolderUseCases,
   ) {}
 
-  async generateInfractionsVehicleDataRetrieval(request: InfractionsVehicleDataRetrievalRequest): Promise<VehicleDataRetrieval> {
-    // Validate that the folder exists and get its data
-    const folder = await this.folderUseCases.findFolderById(request.folderId);
+  async generateInfractionsVehicleDataRetrieval(params: GenerateInfractionsVehicleDataRetrievalParams, userContext: ICurrentUserContext): Promise<VehicleDataRetrieval> {
+    // Validate that the folder exists and belongs to the user
+    const folder = await this.folderUseCases.findFolderById({ folderId: params.folderId }, userContext);
     if (!folder) {
-      throw new Error(`Folder with id ${request.folderId} not found`);
+      throw new Error(`Folder with id ${params.folderId} not found or you don't have permission to access it`);
     }
 
     // Get vehicle data from the folder's vehicle
@@ -35,18 +52,24 @@ export class InfractionsVehicleDataRetrievalUseCase {
     };
 
     // Generate the vehicle data retrieval (this handles the entire process)
-    return await this.vehicleDataRetrievalUseCases.generateVehicleDataRetrieval(
-      request.folderId,
-      'infracciones',
+    return await this.vehicleDataRetrievalUseCases.generateVehicleDataRetrieval({
+      folderId: params.folderId,
+      dataRetrievalType: 'infracciones',
       vehicleData
-    );
+    }, userContext);
   }
 
-  async getInfractionsVehicleDataRetrievalResult(folderId: string): Promise<InfractionsVehicleDataRetrievalData | null> {
-    const vehicleDataRetrieval = await this.vehicleDataRetrievalUseCases.findVehicleDataRetrievalByFolderIdAndType(
-      folderId,
-      'infracciones'
-    );
+  async getInfractionsVehicleDataRetrievalResult(params: GetInfractionsVehicleDataRetrievalResultParams, userContext: ICurrentUserContext): Promise<InfractionsVehicleDataRetrievalData | null> {
+    // First check if the folder belongs to the user
+    const folder = await this.folderUseCases.findFolderById({ folderId: params.folderId }, userContext);
+    if (!folder) {
+      return null; // Return null if folder doesn't exist or user doesn't have access
+    }
+
+    const vehicleDataRetrieval = await this.vehicleDataRetrievalUseCases.findVehicleDataRetrievalByFolderIdAndType({
+      folderId: params.folderId,
+      dataRetrievalType: 'infracciones'
+    }, userContext);
 
     if (!vehicleDataRetrieval || !vehicleDataRetrieval.isCompleted()) {
       return null;
@@ -55,16 +78,22 @@ export class InfractionsVehicleDataRetrievalUseCase {
     return vehicleDataRetrieval.data as InfractionsVehicleDataRetrievalData;
   }
 
-  async getInfractionsVehicleDataRetrievalStatus(folderId: string): Promise<{
+  async getInfractionsVehicleDataRetrievalStatus(params: GetInfractionsVehicleDataRetrievalStatusParams, userContext: ICurrentUserContext): Promise<{
     status: string;
     hasInfractions?: boolean;
     lastUpdated?: string;
     hasMedia: boolean;
   } | null> {
-    const vehicleDataRetrieval = await this.vehicleDataRetrievalUseCases.findVehicleDataRetrievalByFolderIdAndType(
-      folderId,
-      'infracciones'
-    );
+    // First check if the folder belongs to the user
+    const folder = await this.folderUseCases.findFolderById({ folderId: params.folderId }, userContext);
+    if (!folder) {
+      return null; // Return null if folder doesn't exist or user doesn't have access
+    }
+
+    const vehicleDataRetrieval = await this.vehicleDataRetrievalUseCases.findVehicleDataRetrievalByFolderIdAndType({
+      folderId: params.folderId,
+      dataRetrievalType: 'infracciones'
+    }, userContext);
 
     if (!vehicleDataRetrieval) {
       return null;
@@ -78,11 +107,29 @@ export class InfractionsVehicleDataRetrievalUseCase {
     };
   }
 
-  async getInfractionsVehicleDataRetrievalById(id: string): Promise<VehicleDataRetrieval | null> {
-    return await this.vehicleDataRetrievalUseCases.findVehicleDataRetrievalById(id);
+  async getInfractionsVehicleDataRetrievalById(params: GetInfractionsVehicleDataRetrievalByIdParams, userContext: ICurrentUserContext): Promise<VehicleDataRetrieval | null> {
+    const retrieval = await this.vehicleDataRetrievalUseCases.findVehicleDataRetrievalById({ id: params.id }, userContext);
+    
+    if (!retrieval) {
+      return null;
+    }
+
+    // Check if the retrieval belongs to a folder owned by the user
+    const folder = await this.folderUseCases.findFolderById({ folderId: retrieval.folderId }, userContext);
+    if (!folder) {
+      return null; // Return null if user doesn't have access to the folder
+    }
+
+    return retrieval;
   }
 
-  async getInfractionsVehicleDataRetrievalsPrevByFolderId(folderId: string): Promise<VehicleDataRetrievalPrev[]> {
-    return await this.vehicleDataRetrievalUseCases.findVehicleDataRetrievalsPrevByFolderId(folderId);
+  async getInfractionsVehicleDataRetrievalsPrevByFolderId(params: GetInfractionsVehicleDataRetrievalsPrevByFolderIdParams, userContext: ICurrentUserContext): Promise<VehicleDataRetrievalPrev[]> {
+    // First check if the folder belongs to the user
+    const folder = await this.folderUseCases.findFolderById({ folderId: params.folderId }, userContext);
+    if (!folder) {
+      return []; // Return empty array if folder doesn't exist or user doesn't have access
+    }
+
+    return await this.vehicleDataRetrievalUseCases.findVehicleDataRetrievalsPrevByFolderId({ folderId: params.folderId }, userContext);
   }
 } 

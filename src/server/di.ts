@@ -11,9 +11,12 @@ import { VehicleDataRetrievalRepositoryMongoDBImp } from "./data/scraping/Vehicl
 import { InfractionsVehicleDataRetrievalUseCase } from "./domain/usecases/scraping/InfraccionesVehicleDataRetrievalUseCase";
 
 // export const vehicleTransactionUseCase = new VehicleTransactionUseCases(new VehicleTransactionRepositoryMongoDBImp());
-export const folderUseCase = new FolderUseCases(new FolderRepositoryMongoDBImp());
 export const authUseCase = new AuthUseCase(new UserRepositoryMongoDBImp());
 
 // Vehicle data retrieval use cases
 export const vehicleDataRetrievalUseCase = new VehicleDataRetrievalUseCases(new VehicleDataRetrievalRepositoryMongoDBImp());
+
+// Folder use cases (with vehicle data retrieval dependency)
+export const folderUseCase = new FolderUseCases(new FolderRepositoryMongoDBImp(), vehicleDataRetrievalUseCase);
+
 export const infractionsVehicleDataRetrievalUseCase = new InfractionsVehicleDataRetrievalUseCase(vehicleDataRetrievalUseCase, folderUseCase);

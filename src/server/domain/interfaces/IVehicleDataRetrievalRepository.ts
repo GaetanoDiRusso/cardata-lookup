@@ -28,6 +28,7 @@ export interface IVehicleDataRetrievalRepository {
   // Read operations
   findById(id: string): Promise<VehicleDataRetrieval | null>;
   findByFolderIdAndType(folderId: string, dataRetrievalType: VehicleDataRetrievalType): Promise<VehicleDataRetrieval | null>;
+  findAllByFolderId(folderId: string): Promise<VehicleDataRetrieval[]>;
   findAllPrevByFolderId(folderId: string): Promise<VehicleDataRetrievalPrev[]>;
   
   // Update operations

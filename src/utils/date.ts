@@ -1,7 +1,7 @@
-export const formatRelativeDate = (dateString: string): string => {
-  const date = new Date(dateString);
+export const formatRelativeDate = (date: string | Date): string => {
+  const dateToFormat = date instanceof Date ? date : new Date(date);
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  const diffInSeconds = Math.floor((now.getTime() - dateToFormat.getTime()) / 1000);
 
   // Si la diferencia es menor a 60 segundos
   if (diffInSeconds < 60) {
@@ -21,7 +21,7 @@ export const formatRelativeDate = (dateString: string): string => {
   }
 
   // Si la diferencia es mayor a 1 día
-  return date.toLocaleString('es-ES', {
+  return dateToFormat.toLocaleString('es-ES', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

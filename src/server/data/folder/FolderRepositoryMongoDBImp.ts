@@ -132,6 +132,7 @@ export class FolderRepositoryMongoDBImp implements IFolderRepository {
         
         return FolderSchemaToDomain(populatedFolder)
       } catch (error) {
+        console.error(error)
         // If an error occurs, abort the transaction
         await session.abortTransaction()
         throw error
