@@ -171,7 +171,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"folderId\": \"{{folderId}}\"\n}"
+              "raw": "{\n  \"folderId\": \"{{folderId}}\",\n  \"userId\": \"{{userId}}\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/scraping/infracciones",
@@ -181,20 +181,107 @@
           }
         },
         {
-          "name": "Get Infractions Data Retrieval Status",
+          "name": "Generate Debt Data Retrieval",
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"folderId\": \"{{folderId}}\",\n  \"userId\": \"{{userId}}\"\n}"
+            },
             "url": {
-              "raw": "{{baseUrl}}/scraping/infracciones?folderId={{folderId}}",
+              "raw": "{{baseUrl}}/scraping/deuda",
               "host": ["{{baseUrl}}"],
-              "path": ["scraping", "infracciones"],
-              "query": [
-                {
-                  "key": "folderId",
-                  "value": "{{folderId}}"
-                }
-              ]
+              "path": ["scraping", "deuda"]
+            }
+          }
+        },
+        {
+          "name": "Generate Matricula Data Retrieval",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"folderId\": \"{{folderId}}\",\n  \"userId\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/scraping/consultar-matricula",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraping", "consultar-matricula"]
+            }
+          }
+        },
+        {
+          "name": "Generate Payment Agreement Data Retrieval",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"folderId\": \"{{folderId}}\",\n  \"userId\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/scraping/consultar-convenio",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraping", "consultar-convenio"]
+            }
+          }
+        },
+        {
+          "name": "Generate Solicitar Certificado Data Retrieval",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"folderId\": \"{{folderId}}\",\n  \"userId\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/scraping/solicitar-certificado",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraping", "solicitar-certificado"]
+            }
+          }
+        },
+        {
+          "name": "Generate Certificado SUCIVE Data Retrieval",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"folderId\": \"{{folderId}}\",\n  \"userId\": \"{{userId}}\",\n  \"requestNumber\": \"TRAMITE123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/scraping/certificado-sucive",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraping", "certificado-sucive"]
             }
           }
         }

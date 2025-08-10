@@ -85,10 +85,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate vehicle fields
-    const { registrationNumber, plateNumber, brand, model, year } = vehicle;
-    if (!registrationNumber || !plateNumber || !brand || !model || !year) {
+    const { registrationNumber, plateNumber, brand, model, year, department } = vehicle;
+    if (!registrationNumber || !plateNumber || !brand || !model || !year || !department) {
       return NextResponse.json({ 
-        error: 'Missing vehicle fields: registrationNumber, plateNumber, brand, model, year' 
+        error: 'Missing vehicle fields: registrationNumber, plateNumber, brand, model, year, department' 
       }, { status: 400 });
     }
 
@@ -116,6 +116,7 @@ export async function POST(request: NextRequest) {
           brand,
           model,
           year,
+          department,
         },
         seller: {
           identificationNumber: sellerId,

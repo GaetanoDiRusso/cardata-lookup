@@ -10,6 +10,8 @@ import {
   FindFoldersByVehicleRegistrationParams,
   FindFoldersByPersonIdentificationParams
 } from "./FolderUseCaseDTOs";
+import { FolderValidator } from "../../validators/FolderValidator";
+import { CustomError, errorCodeEnum } from "@/server/utils/CustomError";
 
 export type CreateNewFolderDTO = ICreateFolderData
 
@@ -26,6 +28,23 @@ export class FolderUseCases {
     }
 
     async createFolder(params: CreateFolderParams, userContext: ICurrentUserContext): Promise<Folder> {
+        // Validate the folder data
+        const validationResult = FolderValidator.validate({
+            vehicle: params.folder.vehicle,
+            buyer: params.folder.buyer,
+            seller: params.folder.seller
+        });
+
+        if (!validationResult.isValid) {
+            const allErrors = FolderValidator.getAllErrors(validationResult);
+            throw new CustomError(
+                errorCodeEnum.VALIDATION_ERROR,
+                `Error de validación: ${allErrors.join(', ')}`
+            );
+        }
+
+        console.log('>>> params.folder', params.folder);
+
         const result = await this.folderRepository.create({
             ...params.folder,
             ownerId: userContext.userId
@@ -33,7 +52,7 @@ export class FolderUseCases {
         return result;
     }
 
-    async findFoldersPrevByUserId(params: {}, userContext: ICurrentUserContext): Promise<FolderPrev[]> {
+    async findFoldersPrevByUserId(_params: {}, userContext: ICurrentUserContext): Promise<FolderPrev[]> {
         return await this.folderRepository.findAllPrevByUserId(userContext.userId);
     }
 
@@ -43,6 +62,8 @@ export class FolderUseCases {
         if (!folder) {
             return null;
         }
+
+        console.log('>>> folder', folder);
 
         // Check if the folder belongs to the user
         if (folder.ownerId !== userContext.userId) {

@@ -28,6 +28,10 @@ const VehicleSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Please provide the vehicle year'],
     },
+    department: {
+        type: String,
+        required: [true, 'Please provide the vehicle department'],
+    },
     createdAt: {
         type: Date,
         default: Date.now,
@@ -45,6 +49,7 @@ VehicleSchema.index({ registrationNumber: 1, folderId: 1 }, { unique: true });
 VehicleSchema.index({ registrationNumber: 1 });
 
 export const VehicleSchemaToDomain = (vehicle: any): Vehicle => {
+    console.log('>>> vehicle', vehicle);
     return new Vehicle(
         vehicle._id.toString(),
         {
@@ -53,6 +58,7 @@ export const VehicleSchemaToDomain = (vehicle: any): Vehicle => {
             brand: vehicle.brand,
             model: vehicle.model,
             year: vehicle.year,
+            department: vehicle.department,
         },
         vehicle.folderId?.toString() || '',
         vehicle.createdAt,

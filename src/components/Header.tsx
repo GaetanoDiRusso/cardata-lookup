@@ -10,7 +10,7 @@ const Header = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   
   // Mock data - replace with real data later
-  const userBalance = 1000;
+  const userBalance = 9999;
 
   return (
     <header className="sticky top-0 left-0 right-0 bg-white shadow-md z-50">

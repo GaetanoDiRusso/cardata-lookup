@@ -74,11 +74,15 @@ export class FolderRepositoryMongoDBImp implements IFolderRepository {
         // Start the transaction
         session.startTransaction()
 
+        console.log('>>> folder.vehicle', folder.vehicle);
+
         // Step 1: Create the vehicle (without folderId)
         const vehicle = await VehicleSchema.create([{
           ...folder.vehicle,
           // folderId will be updated after folder creation
         }], { session })
+
+        console.log('>>> vehicle RESULTS', vehicle);
 
         // Step 2: Create the buyer (without folderId)
         const buyer = await PersonSchema.create([{

@@ -10,6 +10,7 @@ import { PFolder, PFolderPrev } from "@/models/PFolder";
 import { folderUseCase } from "@/server/di";
 import { CreateNewFolderDTO } from "@/server/domain/usecases/folder/FolderUseCases";
 import { ICurrentUserContext } from "@/server/domain/interfaces/ICurrentUserContext";
+import { sanitizeVehicle, sanitizePerson } from "@/shared/validators/ValidationRules";
 
 export type CreateNewFolderData = Omit<CreateNewFolderDTO, 'ownerId'>;
 
@@ -27,17 +28,42 @@ export const createNewFolder = async (folderData: CreateNewFolderData): Promise<
     userId: (session?.user as any).id,
   };
 
-  const result = await folderUseCase.createFolder({
-    folder: {
-      ...folderData,
+  try {
+    // Sanitize the data
+    const sanitizedFolderData: CreateNewFolderDTO = {
+      vehicle: {
+        ...sanitizeVehicle(folderData.vehicle),
+        department: sanitizeVehicle(folderData.vehicle).department as any
+      },
+      buyer: sanitizePerson(folderData.buyer),
+      seller: sanitizePerson(folderData.seller),
+      ownerId: userContext.userId
+    };
+
+    const result = await folderUseCase.createFolder({
+      folder: sanitizedFolderData,
+    }, userContext);
+
+    revalidatePath(getHomeRoute());
+
+    return {
+      ok: true,
+      data: result.toPresentation(),
     }
-  }, userContext);
-
-  revalidatePath(getHomeRoute());
-
-  return {
-    ok: true,
-    data: result.toPresentation(),
+  } catch (error) {
+    if (error instanceof CustomError) {
+      return {
+        ok: false,
+        error: createCustomErrorResponse(error),
+      }
+    }
+    
+    return {
+      ok: false,
+      error: createCustomErrorResponse(
+        new CustomError(errorCodeEnum.INTERNAL_SERVER_ERROR, 'Error interno del servidor')
+      ),
+    }
   }
 };
 

@@ -2,6 +2,7 @@ import { VehicleDataRetrieval, VehicleDataRetrievalPrev } from '../../entities/V
 import { IVehicleDataRetrievalRepository, ICreateVehicleDataRetrievalData, IUpdateVehicleDataRetrievalData } from '../../interfaces/IVehicleDataRetrievalRepository';
 import { VehicleDataRetrievalType, VehicleDataRetrievalStatus } from '@/models/PScrapingResult';
 import { ICurrentUserContext } from '../../interfaces/ICurrentUserContext';
+import { dataRetrievalService } from '../../../data/scraping/DataRetrievalService';
 import {
   GenerateVehicleDataRetrievalParams,
   FindVehicleDataRetrievalByIdParams,
@@ -40,11 +41,16 @@ export class VehicleDataRetrievalUseCases {
       // Update status to in_progress
       await this.updateVehicleDataRetrievalStatus(vehicleDataRetrieval.id, 'in_progress');
 
-      // TODO: Call the actual data retrieval service here
-      // const result = await this.callDataRetrievalService(dataRetrievalType, vehicleData);
-      
-      // For now, simulate the data retrieval process
-      const result = await this.simulateDataRetrieval(params.dataRetrievalType, params.vehicleData);
+      // Call the actual data retrieval service
+      const result = await this.callDataRetrievalService(
+        params.dataRetrievalType, 
+        userContext.userId, 
+        params.vehicleData
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || 'Data retrieval service failed');
+      }
 
       // Update with completed result
       return await this.updateVehicleDataRetrieval({
@@ -52,9 +58,9 @@ export class VehicleDataRetrievalUseCases {
         data: {
           status: 'completed',
           data: result.data,
-          imageUrls: result.imageUrls || [],
-          pdfUrls: result.pdfUrls || [],
-          videoUrls: result.videoUrls || [],
+          imageUrls: result.imagePathsUrls || [],
+          pdfUrls: result.pdfPathsUrls || [],
+          videoUrls: result.videoPathsUrls || [],
           completedAt: new Date(),
         }
       }, userContext);
@@ -148,40 +154,49 @@ export class VehicleDataRetrievalUseCases {
     return await this.vehicleDataRetrievalRepository.create(data);
   }
 
-  private async simulateDataRetrieval(dataRetrievalType: VehicleDataRetrievalType, vehicleData: any): Promise<{
+  private async callDataRetrievalService(
+    dataRetrievalType: VehicleDataRetrievalType,
+    userId: string,
+    vehicleData: any
+  ): Promise<{
+    success: boolean;
     data: any;
-    imageUrls?: string[];
-    pdfUrls?: string[];
-    videoUrls?: string[];
+    imagePathsUrls?: string[];
+    pdfPathsUrls?: string[];
+    videoPathsUrls?: string[];
+    error?: string;
   }> {
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Prepare vehicle data for the service
+      // Handle both direct vehicle data and nested vehicleData structure
+      const serviceVehicleData = {
+        matricula: vehicleData.plateNumber || vehicleData.vehicleData?.plateNumber || vehicleData.matricula,
+        padron: vehicleData.registrationNumber || vehicleData.vehicleData?.registrationNumber || vehicleData.padron,
+        departamento: vehicleData.department || vehicleData.vehicleData?.department || vehicleData.departamento || 'Montevideo',
+      };
 
-    // Simulate different results based on retrieval type
-    switch (dataRetrievalType) {
-      case 'infracciones':
-        return {
-          data: { hasInfractions: Math.random() > 0.5 },
-          imageUrls: ['https://example.com/screenshots/infractions-screenshot.png'],
-          pdfUrls: ['https://example.com/pdfs/infractions-report.pdf'],
-          videoUrls: ['https://example.com/videos/infractions-recording.mp4'],
-        };
-      case 'deuda':
-        return {
-          data: { hasDebt: Math.random() > 0.5, amount: Math.floor(Math.random() * 10000) },
-          imageUrls: ['https://example.com/screenshots/debt-screenshot.png'],
-          pdfUrls: ['https://example.com/pdfs/debt-report.pdf'],
-        };
-      case 'certificado_sucive':
-        return {
-          data: { certificateNumber: 'CERT-' + Math.floor(Math.random() * 100000) },
-          pdfUrls: ['https://example.com/pdfs/certificate.pdf'],
-        };
-      default:
-        return {
-          data: { message: 'Data retrieved successfully' },
-          imageUrls: ['https://example.com/screenshots/default-screenshot.png'],
-        };
+      // Call the data retrieval service
+      const result = await dataRetrievalService.retrieveDataByType(
+        dataRetrievalType,
+        userId,
+        serviceVehicleData
+      );
+
+      return {
+        success: result.success,
+        data: result.data,
+        imagePathsUrls: result.imagePathsUrls,
+        pdfPathsUrls: result.pdfPathsUrls,
+        videoPathsUrls: result.videoPathsUrls,
+        error: result.error,
+      };
+    } catch (error) {
+      console.error(`Error calling data retrieval service for type ${dataRetrievalType}:`, error);
+      return {
+        success: false,
+        data: {},
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      };
     }
   }
 } 

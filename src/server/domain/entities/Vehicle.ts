@@ -19,6 +19,7 @@ export class Vehicle {
             brand: this.vehicleData.brand,
             model: this.vehicleData.model,
             year: this.vehicleData.year,
+            department: this.vehicleData.department,
         }
     }
 }

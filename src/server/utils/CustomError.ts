@@ -22,6 +22,7 @@ export enum errorCodeEnum {
   NEW_CHILD_CREATION_ERROR = "new_child_creation_error",
   ERROR_GETTING_PROFILES = "error_getting_profiles",
   CHILD_NAME_ALREADY_EXISTS = "child_name_already_exists",
+  VALIDATION_ERROR = "validation_error",
 }
 
 export enum errorMessageEnum {

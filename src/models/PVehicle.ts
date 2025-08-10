@@ -1,3 +1,5 @@
+import { DepartmentCode } from '@/server/constants/departments';
+
 export interface PVehicle {
     id: string;
     registrationNumber: string; // Unique identifier that never changes
@@ -5,6 +7,7 @@ export interface PVehicle {
     brand: string;
     model: string;
     year: number;
+    department: DepartmentCode;
 }
 
 export interface PVehiclePrev {

@@ -5,22 +5,10 @@ const useVehicleForm = () => {
     const [vehicleFormData, setVehicleFormData] = useState<VehicleFormData>({
         plateNumber: '',
         registrationNumber: '',
-        department: '',
         brand: '',
         model: '',
         year: new Date().getFullYear(),
-        type: '',
-        cylinders: 0,
-        fuel: '',
-        attribute: '',
-        engineCapacity: 0,
-        totalWeight: 0,
-        engineNumber: '',
-        chassisNumber: '',
-        axles: 0,
-        passengers: 0,
-        ownerName: '',
-        ownerIdentification: '',
+        department: 'UYMO', // Default to Montevideo
     });
 
     const handleVehicleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
