@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { VehicleForm } from '@/components/VehicleForm';
 import { BuyerForm } from '@/components/BuyerForm';
 import { SellerForm } from '@/components/SellerForm';
@@ -9,6 +10,9 @@ import { ValidationErrorDisplay } from '@/components/ValidationErrorDisplay';
 import useNewFolderViewModel from '../useNewFolderViewModel';
 
 export default function NewFolderView() {
+  const [skipBuyer, setSkipBuyer] = useState(true);
+  const [skipSeller, setSkipSeller] = useState(true);
+
   const { 
     vehicleForm, 
     buyerForm, 
@@ -29,7 +33,7 @@ export default function NewFolderView() {
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-8">Nueva Carpeta</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={(e) => handleSubmit(e, skipBuyer, skipSeller)} className="space-y-8">
           {/* General Errors */}
           {validationErrors.general.length > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -52,26 +56,52 @@ export default function NewFolderView() {
 
           {/* Sección 2: Datos del Comprador */}
           <section>
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Datos del COMPRADOR</h2>
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <BuyerForm 
-                useBuyerFormDataInstance={buyerForm} 
-                errors={validationErrors.buyer}
-              />
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-700">Datos del COMPRADOR</h2>
+              <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={skipBuyer}
+                  onChange={(e) => setSkipBuyer(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>Omitir por ahora</span>
+              </label>
             </div>
+            {!skipBuyer && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <BuyerForm 
+                  useBuyerFormDataInstance={buyerForm} 
+                  errors={validationErrors.buyer}
+                />
+              </div>
+            )}
           </section>
 
           <hr className="border-gray-200" />
 
           {/* Sección 3: Datos del Vendedor */}
           <section>
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Datos del VENDEDOR</h2>
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <SellerForm 
-                useSellerFormDataInstance={sellerForm} 
-                errors={validationErrors.seller}
-              />
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-700">Datos del VENDEDOR</h2>
+              <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={skipSeller}
+                  onChange={(e) => setSkipSeller(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>Omitir por ahora</span>
+              </label>
             </div>
+            {!skipSeller && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <SellerForm 
+                  useSellerFormDataInstance={sellerForm} 
+                  errors={validationErrors.seller}
+                />
+              </div>
+            )}
           </section>
 
           <div className="flex items-center gap-4">

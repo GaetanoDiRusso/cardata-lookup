@@ -33,12 +33,12 @@ const useNewFolderViewModel = () => {
 
     const validateForm = (): boolean => {
         const vehicleValidation = validateVehicle(vehicleForm.vehicleFormData);
-        const buyerValidation = validatePerson(buyerForm.data);
-        const sellerValidation = validatePerson(sellerForm.data);
+        const buyerValidation = buyerForm.data.identificationNumber ? validatePerson(buyerForm.data) : { isValid: true, errors: [] };
+        const sellerValidation = sellerForm.data.identificationNumber ? validatePerson(sellerForm.data) : { isValid: true, errors: [] };
 
         const generalErrors: string[] = [];
 
-        // Check for duplicate identification numbers
+        // Check for duplicate identification numbers only if both buyer and seller have identification numbers
         if (buyerForm.data.identificationNumber && sellerForm.data.identificationNumber) {
             if (buyerForm.data.identificationNumber === sellerForm.data.identificationNumber) {
                 generalErrors.push('El comprador y vendedor no pueden tener el mismo número de identificación');
@@ -57,7 +57,7 @@ const useNewFolderViewModel = () => {
         return vehicleValidation.isValid && buyerValidation.isValid && sellerValidation.isValid && generalErrors.length === 0;
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent, skipBuyer: boolean = false, skipSeller: boolean = false) => {
         e.preventDefault();
         
         // Clear previous errors
@@ -75,8 +75,8 @@ const useNewFolderViewModel = () => {
             
             const folderData: CreateNewFolderServerActionData = {
                 vehicle: vehicleForm.vehicleFormData,
-                buyer: buyerForm.data,
-                seller: sellerForm.data,
+                buyer: (!skipBuyer && buyerForm.data.identificationNumber) ? buyerForm.data : undefined,
+                seller: (!skipSeller && sellerForm.data.identificationNumber) ? sellerForm.data : undefined,
             }
 
             console.log('>>> folderData', folderData);

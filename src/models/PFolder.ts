@@ -6,8 +6,8 @@ export interface PFolder {
     id: string;
     ownerId: string; // User who owns this folder
     vehicle: PVehicle;
-    seller: PPerson; // Person selling the vehicle
-    buyer: PPerson; // Person buying the vehicle
+    seller: PPerson | null; // Person selling the vehicle (optional)
+    buyer: PPerson | null; // Person buying the vehicle (optional)
     vehicleDataRetrievals: PVehicleDataRetrieval[]; // All vehicle data retrievals for this folder
     createdAt: Date;
     updatedAt: Date;
@@ -23,6 +23,6 @@ export interface PFolderPrev {
         registrationNumber: string;
         plateNumber: string;
     };
-    buyerName: string;
+    buyerName: string | null; // Made optional
     lastUpdated: string; // ISO date string
 }

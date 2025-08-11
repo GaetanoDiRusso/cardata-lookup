@@ -60,7 +60,7 @@ export class FolderRepositoryMongoDBImp implements IFolderRepository {
   /**
    * Create a new folder.
    * Creates vehicle and people entries for this specific folder.
-   * @param folder - The folder to create with the vehicle, buyer and seller data
+   * @param folder - The folder to create with the vehicle, buyer and seller data (optional)
    * @returns The created folder
    */
   async create(folder: ICreateFolderData): Promise<Folder> {
@@ -84,26 +84,32 @@ export class FolderRepositoryMongoDBImp implements IFolderRepository {
 
         console.log('>>> vehicle RESULTS', vehicle);
 
-        // Step 2: Create the buyer (without folderId)
-        const buyer = await PersonSchema.create([{
-          ...folder.buyer,
-          role: 'buyer',
-          // folderId will be updated after folder creation
-        }], { session })
+        // Step 2: Create the buyer (only if provided)
+        let buyer = null;
+        if (folder.buyer) {
+          buyer = await PersonSchema.create([{
+            ...folder.buyer,
+            role: 'buyer',
+            // folderId will be updated after folder creation
+          }], { session })
+        }
 
-        // Step 3: Create the seller (without folderId)
-        const seller = await PersonSchema.create([{
-          ...folder.seller,
-          role: 'seller',
-          // folderId will be updated after folder creation
-        }], { session })
+        // Step 3: Create the seller (only if provided)
+        let seller = null;
+        if (folder.seller) {
+          seller = await PersonSchema.create([{
+            ...folder.seller,
+            role: 'seller',
+            // folderId will be updated after folder creation
+          }], { session })
+        }
         
         // Step 4: Create the folder with references to the created entities
         const folderDoc = await FolderSchema.create([{
           ownerId: folder.ownerId,
           vehicle: vehicle[0]._id,
-          buyer: buyer[0]._id,
-          seller: seller[0]._id,
+          buyer: buyer ? buyer[0]._id : undefined,
+          seller: seller ? seller[0]._id : undefined,
         }], { session })
 
         const folderId = folderDoc[0]._id
@@ -114,16 +120,22 @@ export class FolderRepositoryMongoDBImp implements IFolderRepository {
           { $set: { folderId: folderId } }, 
           { session }
         )
-        await PersonSchema.updateOne(
-          { _id: buyer[0]._id }, 
-          { $set: { folderId: folderId } }, 
-          { session }
-        )
-        await PersonSchema.updateOne(
-          { _id: seller[0]._id }, 
-          { $set: { folderId: folderId } }, 
-          { session }
-        )
+        
+        if (buyer) {
+          await PersonSchema.updateOne(
+            { _id: buyer[0]._id }, 
+            { $set: { folderId: folderId } }, 
+            { session }
+          )
+        }
+        
+        if (seller) {
+          await PersonSchema.updateOne(
+            { _id: seller[0]._id }, 
+            { $set: { folderId: folderId } }, 
+            { session }
+          )
+        }
         
         // Commit the transaction
         await session.commitTransaction()

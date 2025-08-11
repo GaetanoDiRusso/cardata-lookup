@@ -1,12 +1,10 @@
 import { VehicleValidator } from './VehicleValidator';
 import { PersonValidator } from './PersonValidator';
-import { PVehicle } from '@/models/PVehicle';
-import { PPerson } from '@/models/PPerson';
 
 export interface FolderValidationData {
-  vehicle: Omit<PVehicle, 'id'>;
-  buyer: Omit<PPerson, 'id'>;
-  seller: Omit<PPerson, 'id'>;
+  vehicle: any;
+  buyer?: any; // Made optional
+  seller?: any; // Made optional
 }
 
 export interface FolderValidationResult {
@@ -22,13 +20,13 @@ export interface FolderValidationResult {
 export class FolderValidator {
   static validate(data: FolderValidationData): FolderValidationResult {
     const vehicleValidation = VehicleValidator.validate(data.vehicle);
-    const buyerValidation = PersonValidator.validate(data.buyer);
-    const sellerValidation = PersonValidator.validate(data.seller);
+    const buyerValidation = data.buyer ? PersonValidator.validate(data.buyer) : { isValid: true, errors: [] };
+    const sellerValidation = data.seller ? PersonValidator.validate(data.seller) : { isValid: true, errors: [] };
 
     const generalErrors: string[] = [];
 
-    // Check for duplicate identification numbers
-    if (data.buyer.identificationNumber && data.seller.identificationNumber) {
+    // Check for duplicate identification numbers only if both buyer and seller are provided
+    if (data.buyer?.identificationNumber && data.seller?.identificationNumber) {
       if (data.buyer.identificationNumber === data.seller.identificationNumber) {
         generalErrors.push('El comprador y vendedor no pueden tener el mismo número de identificación');
       }

@@ -35,8 +35,8 @@ export const createNewFolder = async (folderData: CreateNewFolderData): Promise<
         ...sanitizeVehicle(folderData.vehicle),
         department: sanitizeVehicle(folderData.vehicle).department as any
       },
-      buyer: sanitizePerson(folderData.buyer),
-      seller: sanitizePerson(folderData.seller),
+      buyer: folderData.buyer ? sanitizePerson(folderData.buyer) : undefined,
+      seller: folderData.seller ? sanitizePerson(folderData.seller) : undefined,
       ownerId: userContext.userId
     };
 
@@ -89,6 +89,7 @@ export const getUserFolders = async (): Promise<ServerActionResponse<PFolderPrev
       data: folders.map(folder => folder.toPresentation()),
     }
   } catch (error) {
+    console.error("Error in getUserFolders", error);
     return {
       ok: false,
       error: createCustomErrorResponse(new CustomError(errorCodeEnum.INTERNAL_SERVER_ERROR, 'Failed to fetch user folders')),

@@ -12,6 +12,7 @@ const Home = async () => {
   try {
     foldersPrev = await callServerAction(getUserFolders());
   } catch (error) {
+    console.error(error);
     return <div>Unexpected error, please try again</div>
   }
 

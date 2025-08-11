@@ -5,8 +5,8 @@ import { VehicleData } from "../entities/Vehicle";
 export interface ICreateFolderData {
     ownerId: string;
     vehicle: VehicleData;
-    seller: Omit<PPerson, 'id'>;
-    buyer: Omit<PPerson, 'id'>;
+    seller?: Omit<PPerson, 'id'>; // Made optional
+    buyer?: Omit<PPerson, 'id'>; // Made optional
 }
 
 export interface IFolderRepository {

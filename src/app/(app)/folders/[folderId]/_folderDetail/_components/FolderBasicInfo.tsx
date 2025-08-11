@@ -41,48 +41,57 @@ export const FolderBasicInfo = ({ folder }: FolderBasicInfoProps) => {
         </div>
       </div>
 
-      <hr className="border-gray-200" />
+      {/* Only show person information if buyer or seller exists */}
+      {(folder.buyer || folder.seller) && (
+        <>
+          <hr className="border-gray-200" />
 
-      {/* Person Information - Side by Side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Buyer Information - Left */}
-        <div>
-          <h3 className="text-lg font-medium text-gray-700 mb-3">Datos del Comprador</h3>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Nombre</label>
-              <p className="text-gray-900 font-semibold">{folder.buyer.name}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Cédula de Identidad</label>
-              <p className="text-gray-900 font-semibold">{folder.buyer.identificationNumber}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Fecha de Nacimiento</label>
-              <p className="text-gray-900 font-semibold">{folder.buyer.dateOfBirth}</p>
-            </div>
-          </div>
-        </div>
+          {/* Person Information - Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Buyer Information */}
+            {folder.buyer && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-700 mb-3">Datos del Comprador</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Nombre</label>
+                    <p className="text-gray-900 font-semibold">{folder.buyer.name}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Número de Identificación</label>
+                    <p className="text-gray-900 font-semibold">{folder.buyer.identificationNumber}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Fecha de Nacimiento</label>
+                    <p className="text-gray-900 font-semibold">{folder.buyer.dateOfBirth}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
-        {/* Seller Information - Right */}
-        <div>
-          <h3 className="text-lg font-medium text-gray-700 mb-3">Datos del Vendedor</h3>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Nombre</label>
-              <p className="text-gray-900 font-semibold">{folder.seller.name}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Cédula de Identidad</label>
-              <p className="text-gray-900 font-semibold">{folder.seller.identificationNumber}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Fecha de Nacimiento</label>
-              <p className="text-gray-900 font-semibold">{folder.seller.dateOfBirth}</p>
-            </div>
+            {/* Seller Information */}
+            {folder.seller && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-700 mb-3">Datos del Vendedor</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Nombre</label>
+                    <p className="text-gray-900 font-semibold">{folder.seller.name}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Número de Identificación</label>
+                    <p className="text-gray-900 font-semibold">{folder.seller.identificationNumber}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Fecha de Nacimiento</label>
+                    <p className="text-gray-900 font-semibold">{folder.seller.dateOfBirth}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }; 

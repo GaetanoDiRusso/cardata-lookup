@@ -18,12 +18,12 @@ const FolderSchema = new mongoose.Schema({
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Person',
-    required: [true, 'Please provide the seller id'],
+    required: false, // Made optional
   },
   buyer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Person',
-    required: [true, 'Please provide the buyer id'],
+    required: false, // Made optional
   },
   createdAt: {
     type: Date,
@@ -37,8 +37,8 @@ const FolderSchema = new mongoose.Schema({
 
 export const FolderSchemaToDomain = (folder: any): Folder => {
   const vehicle = VehicleSchemaToDomain(folder.vehicle)
-  const seller = PersonSchemaToDomain(folder.seller)
-  const buyer = PersonSchemaToDomain(folder.buyer)
+  const seller = folder.seller ? PersonSchemaToDomain(folder.seller) : null
+  const buyer = folder.buyer ? PersonSchemaToDomain(folder.buyer) : null
 
   return new Folder(
     folder._id.toString(),
@@ -53,12 +53,12 @@ export const FolderSchemaToDomain = (folder: any): Folder => {
 
 export const FolderSchemaToPrevDomain = (folder: any): FolderPrev => {
   const vehicle = VehicleSchemaToDomain(folder.vehicle)
-  const buyer = PersonSchemaToDomain(folder.buyer)
+  const buyer = folder.buyer ? PersonSchemaToDomain(folder.buyer) : null
 
   return new FolderPrev(
-    folder._id.toString(), 
-    folder.ownerId.toString(), 
-    vehicle, 
+    folder._id.toString(),
+    folder.ownerId.toString(),
+    vehicle,
     buyer,
     folder.createdAt,
   )

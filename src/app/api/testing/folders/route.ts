@@ -76,11 +76,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Validate required fields
-    const { ownerId, vehicle, seller, buyer } = body;
+    const { ownerId, vehicle } = body;
     
-    if (!ownerId || !vehicle || !seller || !buyer) {
+    if (!ownerId || !vehicle) {
       return NextResponse.json({ 
-        error: 'Missing required fields: ownerId, vehicle, seller, buyer' 
+        error: 'Missing required fields: ownerId, vehicle' 
       }, { status: 400 });
     }
 
@@ -92,43 +92,50 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Validate seller fields
-    const { identificationNumber: sellerId, name: sellerName, dateOfBirth: sellerDob } = seller;
-    if (!sellerId || !sellerName || !sellerDob) {
-      return NextResponse.json({ 
-        error: 'Missing seller fields: identificationNumber, name, dateOfBirth' 
-      }, { status: 400 });
+    // Prepare folder data
+    const folderData: any = {
+      vehicle: {
+        registrationNumber,
+        plateNumber,
+        brand,
+        model,
+        year,
+        department,
+      }
+    };
+
+    // Add buyer data if provided
+    if (body.buyer) {
+      const { identificationNumber: buyerId, name: buyerName, dateOfBirth: buyerDob } = body.buyer;
+      if (!buyerId || !buyerName || !buyerDob) {
+        return NextResponse.json({ 
+          error: 'Missing buyer fields: identificationNumber, name, dateOfBirth' 
+        }, { status: 400 });
+      }
+      folderData.buyer = {
+        identificationNumber: buyerId,
+        name: buyerName,
+        dateOfBirth: buyerDob,
+      };
     }
 
-    // Validate buyer fields
-    const { identificationNumber: buyerId, name: buyerName, dateOfBirth: buyerDob } = buyer;
-    if (!buyerId || !buyerName || !buyerDob) {
-      return NextResponse.json({ 
-        error: 'Missing buyer fields: identificationNumber, name, dateOfBirth' 
-      }, { status: 400 });
+    // Add seller data if provided
+    if (body.seller) {
+      const { identificationNumber: sellerId, name: sellerName, dateOfBirth: sellerDob } = body.seller;
+      if (!sellerId || !sellerName || !sellerDob) {
+        return NextResponse.json({ 
+          error: 'Missing seller fields: identificationNumber, name, dateOfBirth' 
+        }, { status: 400 });
+      }
+      folderData.seller = {
+        identificationNumber: sellerId,
+        name: sellerName,
+        dateOfBirth: sellerDob,
+      };
     }
 
     const folder = await folderUseCase.createFolder({
-      folder: {
-        vehicle: {
-          registrationNumber,
-          plateNumber,
-          brand,
-          model,
-          year,
-          department,
-        },
-        seller: {
-          identificationNumber: sellerId,
-          name: sellerName,
-          dateOfBirth: sellerDob,
-        },
-        buyer: {
-          identificationNumber: buyerId,
-          name: buyerName,
-          dateOfBirth: buyerDob,
-        },
-      }
+      folder: folderData,
     }, {
       userId: ownerId,
     });

@@ -183,12 +183,12 @@ export class VehicleDataRetrievalUseCases {
       );
 
       return {
-        success: result.success,
+        success: true,
         data: result.data,
         imagePathsUrls: result.imagePathsUrls,
         pdfPathsUrls: result.pdfPathsUrls,
         videoPathsUrls: result.videoPathsUrls,
-        error: result.error,
+        // error: result.error,
       };
     } catch (error) {
       console.error(`Error calling data retrieval service for type ${dataRetrievalType}:`, error);

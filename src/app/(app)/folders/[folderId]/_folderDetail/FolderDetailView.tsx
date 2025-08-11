@@ -5,11 +5,12 @@ import { FolderBasicInfo } from './_components/FolderBasicInfo';
 import { DataRetrievalSection } from './_components/DataRetrievalSection';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import useFolderDetailViewModel from './useFolderDetailViewModel';
+import { DefaultSession } from 'next-auth';
 
 export type Params = {
   data: {
     folder: PFolder;
-    user?: any; // Using any for now, we can refine this later
+    user?: DefaultSession['user']; // Using any for now, we can refine this later
   };
 };
 
