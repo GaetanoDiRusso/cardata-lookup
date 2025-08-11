@@ -15,7 +15,11 @@ console.log('🔐 Auth Config Debug:', {
   GOOGLE_SECRET: GOOGLE_SECRET ? '✅ Set' : '❌ Missing',
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? '✅ Set' : '❌ Missing',
   NEXTAUTH_URL: process.env.NEXTAUTH_URL || '❌ Missing',
-  NODE_ENV: process.env.NODE_ENV
+  NODE_ENV: process.env.NODE_ENV,
+  // Add more detailed URL debugging
+  NEXTAUTH_URL_ACTUAL: process.env.NEXTAUTH_URL,
+  NEXTAUTH_URL_TYPE: typeof process.env.NEXTAUTH_URL,
+  NEXTAUTH_URL_LENGTH: process.env.NEXTAUTH_URL?.length || 0
 })
 
 export const authOptions: AuthOptions = {
@@ -124,4 +128,34 @@ export const authOptions: AuthOptions = {
     },
     secret: process.env.NEXTAUTH_SECRET,
     debug: true, // Enable debug mode in production temporarily
+    // Fix cookie configuration for production
+    cookies: {
+      sessionToken: {
+        name: '__Secure-next-auth.session-token',
+        options: {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: true,
+          // Don't set domain for vercel.app subdomains
+        }
+      },
+      callbackUrl: {
+        name: '__Secure-next-auth.callback-url',
+        options: {
+          sameSite: 'lax',
+          path: '/',
+          secure: true,
+        }
+      },
+      csrfToken: {
+        name: '__Host-next-auth.csrf-token',
+        options: {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: true,
+        }
+      }
+    }
   }
