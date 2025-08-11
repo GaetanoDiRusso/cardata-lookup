@@ -82,7 +82,6 @@ export const getUserFolders = async (): Promise<ServerActionResponse<PFolderPrev
   };
 
   try {
-    console.log('getUserFolders', userContext);
     const folders = await folderUseCase.findFoldersPrevByUserId({}, userContext);
     return {
       ok: true,

@@ -45,7 +45,6 @@ export class FolderPrev {
     ) {}
 
     toPresentation(): PFolderPrev {
-        console.log('FolderPrev toPresentation', this);
         return {
             id: this.id,
             ownerId: this.ownerId,

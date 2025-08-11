@@ -23,16 +23,6 @@ export default async function middleware(req: NextRequest) {
   
   const isLoggedIn = await getToken({ req, secret, cookieName });
 
-  console.log({ 
-    isAuthPath, 
-    isLoggedIn, 
-    path, 
-    authRoutes, 
-    cookieName, 
-    isProduction,
-    NODE_ENV: process.env.NODE_ENV
-  });
-
   // Users that are already logged in should not be able to access public (auth) paths (login, signup, forgot password..)
   if (isAuthPath && isLoggedIn) {
     const url = req.nextUrl.clone();

@@ -15,7 +15,6 @@ const FolderDetail = async ({ params }: { params: Promise<{ folderId: string }> 
   
   try {
     folder = await callServerAction(getFolderById(folderId));
-    console.log('folder', folder);
   } catch (error) {
     return (
       <main className="container mx-auto px-4 py-8">

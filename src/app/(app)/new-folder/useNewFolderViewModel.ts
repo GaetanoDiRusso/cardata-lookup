@@ -79,8 +79,6 @@ const useNewFolderViewModel = () => {
                 seller: (!skipSeller && sellerForm.data.identificationNumber) ? sellerForm.data : undefined,
             }
 
-            console.log('>>> folderData', folderData);
-
             const result: PFolder = await callServerAction(createNewFolderServerAction(folderData));
             
             // If we get here, the folder was created successfully

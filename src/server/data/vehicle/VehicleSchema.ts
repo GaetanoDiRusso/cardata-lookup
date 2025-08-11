@@ -49,7 +49,6 @@ VehicleSchema.index({ registrationNumber: 1, folderId: 1 }, { unique: true });
 VehicleSchema.index({ registrationNumber: 1 });
 
 export const VehicleSchemaToDomain = (vehicle: any): Vehicle => {
-    console.log('>>> vehicle', vehicle);
     return new Vehicle(
         vehicle._id.toString(),
         {

@@ -43,8 +43,6 @@ export class FolderUseCases {
             );
         }
 
-        console.log('>>> params.folder', params.folder);
-
         const result = await this.folderRepository.create({
             ...params.folder,
             ownerId: userContext.userId
@@ -62,8 +60,6 @@ export class FolderUseCases {
         if (!folder) {
             return null;
         }
-
-        console.log('>>> folder', folder);
 
         // Check if the folder belongs to the user
         if (folder.ownerId !== userContext.userId) {
