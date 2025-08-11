@@ -16,9 +16,22 @@ export default async function middleware(req: NextRequest) {
   
   const isAuthPath = authRoutes.some((route) => path.startsWith(route));
   const secret = process.env.NEXTAUTH_SECRET || "";
-  const isLoggedIn = await getToken({ req, secret, cookieName: 'next-auth.session-token' });
+  
+  // Use the correct cookie name based on environment
+  const isProduction = process.env.NODE_ENV === 'production';
+  const cookieName = isProduction ? '__Secure-next-auth.session-token' : 'next-auth.session-token';
+  
+  const isLoggedIn = await getToken({ req, secret, cookieName });
 
-  console.log({ isAuthPath, isLoggedIn, path, authRoutes });
+  console.log({ 
+    isAuthPath, 
+    isLoggedIn, 
+    path, 
+    authRoutes, 
+    cookieName, 
+    isProduction,
+    NODE_ENV: process.env.NODE_ENV
+  });
 
   // Users that are already logged in should not be able to access public (auth) paths (login, signup, forgot password..)
   if (isAuthPath && isLoggedIn) {
