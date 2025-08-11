@@ -43,36 +43,39 @@ export const authOptions: AuthOptions = {
     ],
     callbacks: {
       async signIn({ user, account, profile }) {
-        // if (account?.provider === 'google') {
-        //   try {
-        //     await authUseCase.googleSignIn({
-        //       email: profile?.email as string,
-        //       name: profile?.name as string,
-        //     });
-        //   } catch (error) {
-        //     console.error('SignIn error:', error);
-        //     return false;
-        //   }
-        // }
-        return (profile as any)?.email_verified && account?.provider === 'google';
+        // For Google OAuth, just verify the email is verified
+        if (account?.provider === 'google') {
+          return (profile as any)?.email_verified === true;
+        }
+        return true;
       },
-      async jwt({ token, user }) {
-        if (user) {
-          const userFromDB = await authUseCase.googleSignIn({
-            email: user?.email as string,
-            name: user?.name as string,
-          });
-  
-          if (userFromDB) {
-            token.id = userFromDB.id;
+      async jwt({ token, user, account, profile }) {
+        // If this is a new sign-in with Google
+        if (account?.provider === 'google' && profile) {
+          try {
+            const userFromDB = await authUseCase.googleSignIn({
+              email: profile.email as string,
+              name: profile.name as string,
+            });
+            
+            if (userFromDB) {
+              token.id = userFromDB.id;
+              token.email = userFromDB.email;
+              token.name = userFromDB.name;
+            }
+          } catch (error) {
+            console.error('Google sign-in error:', error);
+            // Don't fail the auth, just log the error
           }
         }
-  
+        
         return token;
       },
       async session({ session, token }) {
         if (session?.user) {
           (session.user as any).id = token.id as string;
+          session.user.email = token.email as string;
+          session.user.name = token.name as string;
         }
         return session;
       }
@@ -82,7 +85,8 @@ export const authOptions: AuthOptions = {
     },
     session: {
       strategy: 'jwt',
-      // maxAge: 30 * 24 * 60 * 60, // 30 days
+      maxAge: 30 * 24 * 60 * 60, // 30 days
     },
     secret: process.env.NEXTAUTH_SECRET,
+    debug: process.env.NODE_ENV === 'development',
   }
