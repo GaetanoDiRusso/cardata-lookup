@@ -380,4 +380,4 @@ cardata-lookup-nextjs/
 **Version**: 1.0.0
 **Architecture**: Clean Architecture with DDD
 **Database**: MongoDB with Transactions
-**Framework**: Next.js 15 with TypeScript 
+**Framework**: Next.js 15 with TypeScript
