@@ -4,7 +4,7 @@ import { getFolderById } from "@/server/infraestructure/server-actions/FolderAct
 import { PFolder } from "@/models/PFolder";
 import FolderDetailView from "./_folderDetail/FolderDetailView";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/authOptions";
 
 const FolderDetail = async ({ params }: { params: Promise<{ folderId: string }> }) => {
   const { folderId } = await params;

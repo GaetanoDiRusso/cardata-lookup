@@ -1,4 +1,4 @@
-import { DepartmentCode, isValidDepartmentCode } from '@/server/constants/departments';
+import { isValidDepartmentCode } from '@/server/constants/departments';
 import { PVehicle } from '@/models/PVehicle';
 import { PPerson } from '@/models/PPerson';
 

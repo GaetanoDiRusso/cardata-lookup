@@ -3,7 +3,7 @@
 import { CustomError, errorCodeEnum, errorMessageEnum, createCustomErrorResponse } from "@/server/utils/CustomError";
 import { ServerActionResponse } from "@/models/ServerActionResponse";
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/authOptions";
 import { revalidatePath } from "next/cache";
 import { getHomeRoute } from "@/constants/navigationRoutes";
 import { PFolder, PFolderPrev } from "@/models/PFolder";

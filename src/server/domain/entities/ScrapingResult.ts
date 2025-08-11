@@ -20,7 +20,7 @@ export class VehicleDataRetrieval {
     return {
       id: this.id,
       folderId: this.folderId,
-      retrievalType: this.retrievalType,
+      dataRetrievalType: this.retrievalType,
       status: this.status,
       data: this.data,
       imageUrls: this.imageUrls,
@@ -37,7 +37,7 @@ export class VehicleDataRetrieval {
     return {
       id: this.id,
       folderId: this.folderId,
-      retrievalType: this.retrievalType,
+      dataRetrievalType: this.retrievalType,
       status: this.status,
       lastUpdated: this.updatedAt.toISOString(),
       hasMedia: this.hasMedia(),
