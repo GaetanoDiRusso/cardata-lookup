@@ -34,7 +34,7 @@ export class Logger {
   private createLogEntry(
     level: LogLevel,
     message: string,
-    jsonData?: Object,
+    jsonData?: object,
   ): LogEntry {
     // Console log the log entry
     console.log("Log entry: ", { userId: this.userId, useCaseName: this.useCaseName, level, message, jsonData, executionEnvironment: this.executionEnvironment });
@@ -50,17 +50,17 @@ export class Logger {
     };
   }
 
-  info(message: string, jsonData?: Object): void {
+  info(message: string, jsonData?: object): void {
     const logEntry = this.createLogEntry(LogLevel.INFO, message, jsonData);
     this.logs.push(logEntry);
   }
 
-  warn(message: string, jsonData?: Object): void {
+  warn(message: string, jsonData?: object): void {
     const logEntry = this.createLogEntry(LogLevel.WARN, message, jsonData);
     this.logs.push(logEntry);
   }
 
-  error(message: string, jsonData?: Object): void {
+  error(message: string, jsonData?: object): void {
     const logEntry = this.createLogEntry(LogLevel.ERROR, message, jsonData);
     this.logs.push(logEntry);
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { paymentAgreementVehicleDataRetrievalUseCase } from '@/server/di';
 import { isTestingEnabled } from '@/constants/testingRoutes';
+import { Logger } from '@/server/domain/utils/Logger';
 
 const isProduction = !isTestingEnabled();
 
@@ -22,7 +23,8 @@ export async function POST(request: NextRequest) {
 
     const result = await paymentAgreementVehicleDataRetrievalUseCase.generatePaymentAgreementVehicleDataRetrieval(
       { folderId },
-      { userId }
+      { userId },
+      new Logger(userId, 'PaymentAgreementVehicleDataRetrievalUseCase :: testing endpoint', 'BACKEND_PROCESSING')
     );
 
     return NextResponse.json(result, { status: 201 });

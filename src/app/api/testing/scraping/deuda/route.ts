@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { debtVehicleDataRetrievalUseCase } from '@/server/di';
 import { isTestingEnabled } from '@/constants/testingRoutes';
+import { Logger } from '@/server/domain/utils/Logger';
 
 // Production restriction - only available in development
 const isProduction = !isTestingEnabled();
@@ -31,7 +32,8 @@ export async function POST(request: NextRequest) {
     // Generate the debt vehicle data retrieval
     const result = await debtVehicleDataRetrievalUseCase.generateDebtVehicleDataRetrieval(
       { folderId },
-      { userId }
+      { userId },
+      new Logger(userId, 'DebtVehicleDataRetrievalUseCase :: testing endpoint', 'BACKEND_PROCESSING')
     );
 
     return NextResponse.json(result, { status: 201 });

@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { solicitarCertificadoVehicleDataRetrievalUseCase } from '@/server/di';
 import { ICurrentUserContext } from '@/server/domain/interfaces/ICurrentUserContext';
+import { Logger } from '@/server/domain/utils/Logger';
+import { isTestingEnabled } from '@/constants/testingRoutes';
+
+const isProduction = !isTestingEnabled();
 
 export async function POST(request: NextRequest) {
+  if (isProduction) {
+    return NextResponse.json({ error: 'Testing endpoints not available in production' }, { status: 403 });
+  }
   try {
     const body = await request.json();
     const { folderId, userId, requesterData } = body;
@@ -18,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!requesterData || !requesterData.fullName || !requesterData.identificationNumber || !requesterData.email) {
       return NextResponse.json(
         { error: 'Missing required requester data: fullName, identificationNumber, email' },
-        { status: 400 }
+        { status: 400 } 
       );
     }
 
@@ -26,7 +33,8 @@ export async function POST(request: NextRequest) {
 
     const result = await solicitarCertificadoVehicleDataRetrievalUseCase.generateSolicitarCertificadoVehicleDataRetrieval(
       { folderId, requesterData },
-      userContext
+      userContext,
+      new Logger(userId, 'SolicitarCertificadoVehicleDataRetrievalUseCase :: testing endpoint', 'BACKEND_PROCESSING')
     );
 
     return NextResponse.json({

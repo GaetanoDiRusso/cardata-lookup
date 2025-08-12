@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { certificadoSuciveVehicleDataRetrievalUseCase } from '@/server/di';
 import { isTestingEnabled } from '@/constants/testingRoutes';
+import { Logger } from '@/server/domain/utils/Logger';
 
 const isProduction = !isTestingEnabled();
 
@@ -25,7 +26,8 @@ export async function POST(request: NextRequest) {
 
     const result = await certificadoSuciveVehicleDataRetrievalUseCase.generateCertificadoSuciveVehicleDataRetrieval(
       { folderId, requestNumber },
-      { userId }
+      { userId },
+      new Logger(userId, 'CertificadoSuciveVehicleDataRetrievalUseCase :: testing endpoint', 'BACKEND_PROCESSING')
     );
 
     return NextResponse.json(result, { status: 201 });
