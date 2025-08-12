@@ -20,6 +20,7 @@ export type SimpleQueryCardProps = {
   existingRetrievals: PVehicleDataRetrieval[];
   isCardCollapsed: boolean;
   onToggleCollapse: () => void;
+  addNewDataRetrieval: (dataRetrieval: PVehicleDataRetrieval) => void;
 };
 
 export const SimpleQueryCard: React.FC<SimpleQueryCardProps> = ({
@@ -29,7 +30,8 @@ export const SimpleQueryCard: React.FC<SimpleQueryCardProps> = ({
   description,
   existingRetrievals,
   isCardCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  addNewDataRetrieval
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,10 +60,9 @@ export const SimpleQueryCard: React.FC<SimpleQueryCardProps> = ({
       setIsLoading(true);
       setError(null);
 
-      await getServerAction();
+      const result = await getServerAction();
 
-      // If we get here, the call was successful - refresh the page to show new results
-      window.location.reload();
+      addNewDataRetrieval(result);
     } catch (error: any) {
       console.error('Error in handleRetrieveData:', error);
       setError(error.message || 'Error inesperado al procesar la solicitud');

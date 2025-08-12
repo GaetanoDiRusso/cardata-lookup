@@ -1,4 +1,5 @@
 import { PVehicleDataRetrieval, PVehicleDataRetrievalPrev, VehicleDataRetrievalType, VehicleDataRetrievalStatus } from '@/models/PScrapingResult';
+import { LogEntry } from '../utils/Logger';
 
 export class VehicleDataRetrieval {
   constructor(
@@ -12,6 +13,7 @@ export class VehicleDataRetrieval {
     public readonly videoUrls: string[],
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly logs: LogEntry[],
     public readonly startedAt?: Date,
     public readonly completedAt?: Date,
   ) {}

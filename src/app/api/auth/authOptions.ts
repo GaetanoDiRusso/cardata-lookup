@@ -75,13 +75,7 @@ export const authOptions: AuthOptions = {
         return token;
       },
       async session({ session, token }) {
-        console.log('🔐 Session Callback:', { 
-          hasSession: !!session, 
-          hasToken: !!token,
-          tokenId: token.id,
-          sessionUser: session?.user?.email 
-        })
-        
+       
         if (session?.user) {
           (session.user as any).id = token.id as string;
           session.user.email = token.email as string;

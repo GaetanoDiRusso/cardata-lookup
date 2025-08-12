@@ -1,11 +1,12 @@
 import { PFolder } from '@/models/PFolder';
 import { DataRetrievalCard } from './DataRetrievalCard';
-import { VehicleDataRetrievalType } from '@/models/PScrapingResult';
+import { PVehicleDataRetrieval, VehicleDataRetrievalType } from '@/models/PScrapingResult';
 import { DefaultSession } from 'next-auth';
 
 export type DataRetrievalSectionProps = {
   folder: PFolder;
   user?: DefaultSession['user']; // Using any for now, we can refine this later
+  addNewDataRetrieval: (dataRetrieval: PVehicleDataRetrieval) => void;
 }
 
 const DATA_RETRIEVAL_TYPES: { type: VehicleDataRetrievalType; label: string; description: string }[] = [
@@ -41,7 +42,7 @@ const DATA_RETRIEVAL_TYPES: { type: VehicleDataRetrievalType; label: string; des
   }
 ];
 
-export const DataRetrievalSection = ({ folder, user }: DataRetrievalSectionProps) => {
+export const DataRetrievalSection = ({ folder, user, addNewDataRetrieval }: DataRetrievalSectionProps) => {
   return (
     <div className="space-y-6">
       <div className="mb-4">
@@ -63,6 +64,7 @@ export const DataRetrievalSection = ({ folder, user }: DataRetrievalSectionProps
               retrieval => retrieval.dataRetrievalType === retrievalType.type
             )}
             user={user}
+            addNewDataRetrieval={addNewDataRetrieval}
           />
         ))}
       </div>

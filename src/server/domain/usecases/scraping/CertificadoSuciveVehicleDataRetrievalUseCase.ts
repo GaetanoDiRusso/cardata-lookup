@@ -4,6 +4,7 @@ import { ICurrentUserContext } from '../../interfaces/ICurrentUserContext';
 import { BaseVehicleDataRetrievalUseCase } from './BaseVehicleDataRetrievalUseCase';
 import { dataRetrievalService } from '../../../data/scraping/DataRetrievalService';
 import { IVehicleDataRetrievalRepository } from '../../interfaces/IVehicleDataRetrievalRepository';
+import { LogEntry, Logger } from '../../utils/Logger';
 
 export interface GenerateCertificadoSuciveVehicleDataRetrievalParams {
   folderId: string;
@@ -33,18 +34,32 @@ export class CertificadoSuciveVehicleDataRetrievalUseCase extends BaseVehicleDat
 
   protected async callDataRetrievalService(
     userId: string, 
-    params: GenerateCertificadoSuciveVehicleDataRetrievalParams
+    params: GenerateCertificadoSuciveVehicleDataRetrievalParams,
+    logger: Logger
   ): Promise<{
     data: any;
     imagePathsUrls?: string[];
     pdfPathsUrls?: string[];
     videoPathsUrls?: string[];
+    success: boolean;
+    error?: string;
   }> {
+    logger.info('Starting callDataRetrievalService', {
+      params,
+    });
+
     // Get folder and extract vehicle data
     const folder = await this.folderUseCases.findFolderById({ folderId: params.folderId }, { userId });
     if (!folder) {
-      throw new Error(`Folder with id ${params.folderId} not found or you don't have permission to access it`);
+      logger.error('Folder not found', {
+        folderId: params.folderId,
+      });
+      throw new Error(`Folder with id ${params.folderId} not found.`);
     }
+
+    logger.info('Folder found', {
+      folderId: params.folderId,
+    });
 
     const vehicleData = {
       matricula: folder.vehicle.vehicleData.plateNumber,
@@ -52,12 +67,30 @@ export class CertificadoSuciveVehicleDataRetrievalUseCase extends BaseVehicleDat
       departamento: folder.vehicle.vehicleData.department,
     };
 
+    logger.info('Calling emitirCertificadoSucive service', {
+      vehicleData,
+      requestNumber: params.requestNumber,
+      userId,
+    });
+
     // Call the SUCIVE certificate service - it will throw on error
     const result = await dataRetrievalService.emitirCertificadoSucive(
-      userId, 
+      userId,
       vehicleData, 
+      logger,
       params.requestNumber
     );
+
+    // Include the logs from the service
+    logger.addLogs(result.logs);
+
+    if (result.success) {
+      logger.info('emitirCertificadoSucive service succeeded');
+    } else {
+      logger.error('emitirCertificadoSucive service failed', {
+        error: result.error,
+      });
+    }
 
     // If we get here, the service succeeded
     return {
@@ -65,14 +98,17 @@ export class CertificadoSuciveVehicleDataRetrievalUseCase extends BaseVehicleDat
       imagePathsUrls: result.imagePathsUrls,
       pdfPathsUrls: result.pdfPathsUrls,
       videoPathsUrls: result.videoPathsUrls,
+      success: result.success,
+      error: result.error || undefined,
     };
   }
 
   // Public method that orchestrates the entire SUCIVE certificate workflow
   async generateCertificadoSuciveVehicleDataRetrieval(
     params: GenerateCertificadoSuciveVehicleDataRetrievalParams, 
-    userContext: ICurrentUserContext
+    userContext: ICurrentUserContext,
+    logger: Logger
   ): Promise<VehicleDataRetrieval> {
-    return this.generateVehicleDataRetrieval(params.folderId, params, userContext);
+    return this.generateVehicleDataRetrieval(params.folderId, params, userContext, logger);
   }
 } 

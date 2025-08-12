@@ -13,6 +13,7 @@ export class VehicleDataRetrievalRepositoryMongoDBImp implements IVehicleDataRet
       imageUrls: data.imageUrls || [],
       pdfUrls: data.pdfUrls || [],
       videoUrls: data.videoUrls || [],
+      logs: data.logs || [],
     });
 
     const savedResult = await vehicleDataRetrieval.save();
@@ -53,6 +54,8 @@ export class VehicleDataRetrievalRepositoryMongoDBImp implements IVehicleDataRet
     if (data.imageUrls !== undefined) updateData.imageUrls = data.imageUrls;
     if (data.pdfUrls !== undefined) updateData.pdfUrls = data.pdfUrls;
     if (data.videoUrls !== undefined) updateData.videoUrls = data.videoUrls;
+
+    if (data.logs !== undefined) updateData.logs = data.logs;
 
     const result = await VehicleDataRetrievalModel.findByIdAndUpdate(
       id,

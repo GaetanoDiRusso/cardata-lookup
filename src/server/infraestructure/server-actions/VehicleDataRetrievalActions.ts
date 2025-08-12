@@ -9,6 +9,7 @@ import { getHomeRoute } from "@/constants/navigationRoutes";
 import { PVehicleDataRetrieval } from "@/models/PScrapingResult";
 import { infractionsVehicleDataRetrievalUseCase, debtVehicleDataRetrievalUseCase, matriculaVehicleDataRetrievalUseCase, paymentAgreementVehicleDataRetrievalUseCase, certificadoSuciveVehicleDataRetrievalUseCase, solicitarCertificadoVehicleDataRetrievalUseCase } from "@/server/di";
 import { ICurrentUserContext } from "@/server/domain/interfaces/ICurrentUserContext";
+import { Logger } from "@/server/domain/utils/Logger";
 
 export type GenerateInfractionsDataRetrievalData = {
   folderId: string;
@@ -37,9 +38,14 @@ export const generateInfractionsDataRetrieval = async (data: GenerateInfractions
   };
 
   try {
+    const logger = new Logger(userContext.userId, 'generateInfractionsDataRetrieval Server Action');
+    logger.info('Starting generateInfractionsDataRetrieval', {
+      data,
+    });
+
     const result = await infractionsVehicleDataRetrievalUseCase.generateInfractionsVehicleDataRetrieval({
       folderId: data.folderId,
-    }, userContext);
+    }, userContext, logger);
 
     revalidatePath(getHomeRoute());
 
@@ -70,9 +76,14 @@ export const generateDebtDataRetrieval = async (data: GenerateDebtDataRetrievalD
   };
 
   try {
+    const logger = new Logger(userContext.userId, 'generateDebtDataRetrieval Server Action');
+    logger.info('Starting generateDebtDataRetrieval', {
+      data,
+    });
+
     const result = await debtVehicleDataRetrievalUseCase.generateDebtVehicleDataRetrieval({
       folderId: data.folderId,
-    }, userContext);
+    }, userContext, logger);
 
     revalidatePath(getHomeRoute());
 
@@ -107,9 +118,14 @@ export const generateMatriculaDataRetrieval = async (data: GenerateMatriculaData
   };
 
   try {
+    const logger = new Logger(userContext.userId, 'generateMatriculaDataRetrieval Server Action');
+    logger.info('Starting generateMatriculaDataRetrieval', {
+      data,
+    });
+
     const result = await matriculaVehicleDataRetrievalUseCase.generateMatriculaVehicleDataRetrieval({
       folderId: data.folderId,
-    }, userContext);
+    }, userContext, logger);
 
     revalidatePath(getHomeRoute());
 
@@ -156,9 +172,14 @@ export const generatePaymentAgreementDataRetrieval = async (data: GeneratePaymen
   };
 
   try {
+    const logger = new Logger(userContext.userId, 'generatePaymentAgreementDataRetrieval Server Action');
+    logger.info('Starting generatePaymentAgreementDataRetrieval', {
+      data,
+    });
+
     const result = await paymentAgreementVehicleDataRetrievalUseCase.generatePaymentAgreementVehicleDataRetrieval({
       folderId: data.folderId,
-    }, userContext);
+    }, userContext, logger);
 
     revalidatePath(getHomeRoute());
 
@@ -189,10 +210,15 @@ export const generateSolicitarCertificadoDataRetrieval = async (data: GenerateSo
   };
 
   try {
+    const logger = new Logger(userContext.userId, 'generateSolicitarCertificadoDataRetrieval Server Action');
+    logger.info('Starting generateSolicitarCertificadoDataRetrieval', {
+      data,
+    });
+
     const result = await solicitarCertificadoVehicleDataRetrievalUseCase.generateSolicitarCertificadoVehicleDataRetrieval({
       folderId: data.folderId,
       requesterData: data.userData,
-    }, userContext);
+    }, userContext, logger);
 
     revalidatePath(getHomeRoute());
 
@@ -227,11 +253,21 @@ export const generateCertificadoSuciveDataRetrieval = async (data: GenerateCerti
     userId: (session?.user as any).id,
   };
 
+  const logger = new Logger(userContext.userId, 'generateCertificadoSuciveDataRetrieval Server Action');
+  logger.info('Starting generateCertificadoSuciveDataRetrieval', {
+    data,
+  });
+
   try {
+    const logger = new Logger(userContext.userId, 'generateCertificadoSuciveDataRetrieval Server Action');
+    logger.info('Starting generateCertificadoSuciveDataRetrieval', {
+      data,
+    });
+
     const result = await certificadoSuciveVehicleDataRetrievalUseCase.generateCertificadoSuciveVehicleDataRetrieval({
       folderId: data.folderId,
       requestNumber: data.requestNumber,
-    }, userContext);
+    }, userContext, logger);
 
     revalidatePath(getHomeRoute());
 

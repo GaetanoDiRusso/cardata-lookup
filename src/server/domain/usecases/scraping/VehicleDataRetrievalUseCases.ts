@@ -14,6 +14,7 @@ import {
   DeleteVehicleDataRetrievalParams,
   DeleteVehicleDataRetrievalsByFolderIdParams
 } from './VehicleDataRetrievalUseCaseDTOs';
+import { Logger } from '../../utils/Logger';
 
 export type CreateVehicleDataRetrievalDTO = ICreateVehicleDataRetrievalData;
 export type UpdateVehicleDataRetrievalDTO = IUpdateVehicleDataRetrievalData;
@@ -30,23 +31,43 @@ export class VehicleDataRetrievalUseCases {
     params: GenerateVehicleDataRetrievalParams,
     userContext: ICurrentUserContext
   ): Promise<VehicleDataRetrieval> {
+    const logger = new Logger(userContext.userId, 'generateVehicleDataRetrieval');
+
+    logger.info('Starting vehicle data retrieval', {
+      userContext,
+      params,
+    });
+
     // Create initial entry with pending status
     const vehicleDataRetrieval = await this.createVehicleDataRetrieval({
       folderId: params.folderId,
       dataRetrievalType: params.dataRetrievalType,
       status: 'pending',
+      logs: logger.getLogs(),
     });
 
     try {
       // Update status to in_progress
       await this.updateVehicleDataRetrievalStatus(vehicleDataRetrieval.id, 'in_progress');
 
+      logger.info('Updated vehicle data retrieval status to in_progress');
+
       // Call the actual data retrieval service
       const result = await this.callDataRetrievalService(
         params.dataRetrievalType, 
         userContext.userId, 
-        params.vehicleData
+        params.vehicleData,
+        logger
       );
+
+      logger.info('Data retrieval service result', {
+        success: result.success,
+        error: result.error,
+        data: result.data,
+        imagePathsUrls: result.imagePathsUrls,
+        pdfPathsUrls: result.pdfPathsUrls,
+        videoPathsUrls: result.videoPathsUrls,
+      });
 
       if (!result.success) {
         throw new Error(result.error || 'Data retrieval service failed');
@@ -157,7 +178,8 @@ export class VehicleDataRetrievalUseCases {
   private async callDataRetrievalService(
     dataRetrievalType: VehicleDataRetrievalType,
     userId: string,
-    vehicleData: any
+    vehicleData: any,
+    logger: Logger
   ): Promise<{
     success: boolean;
     data: any;
@@ -175,11 +197,17 @@ export class VehicleDataRetrievalUseCases {
         departamento: vehicleData.department || vehicleData.vehicleData?.department || vehicleData.departamento || 'Montevideo',
       };
 
+      logger.info('Calling data retrieval service', {
+        dataRetrievalType,
+        serviceVehicleData,
+      });
+
       // Call the data retrieval service
       const result = await dataRetrievalService.retrieveDataByType(
         dataRetrievalType,
         userId,
-        serviceVehicleData
+        serviceVehicleData,
+        logger
       );
 
       return {

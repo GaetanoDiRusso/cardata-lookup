@@ -5,6 +5,7 @@ import { ICurrentUserContext } from '../../interfaces/ICurrentUserContext';
 import { VehicleDataRetrieval } from '../../entities/VehicleDataRetrieval';
 import { dataRetrievalService } from '../../../data/scraping/DataRetrievalService';
 import { IVehicleDataRetrievalRepository } from '../../interfaces/IVehicleDataRetrievalRepository';
+import { Logger } from '../../utils/Logger';
 
 export type GenerateSolicitarCertificadoVehicleDataRetrievalParams = {
   folderId: string;
@@ -38,16 +39,26 @@ export class SolicitarCertificadoVehicleDataRetrievalUseCase extends BaseVehicle
 
   protected async callDataRetrievalService(
     userId: string, 
-    params: GenerateSolicitarCertificadoVehicleDataRetrievalParams
+    params: GenerateSolicitarCertificadoVehicleDataRetrievalParams,
+    logger: Logger
   ): Promise<{
     data: any;
     imagePathsUrls?: string[];
     pdfPathsUrls?: string[];
     videoPathsUrls?: string[];
+    success: boolean;
+    error?: string;
   }> {
+    logger.info('Starting callDataRetrievalService', {
+      params,
+    });
+
     const folder = await this.folderUseCases.findFolderById({ folderId: params.folderId }, { userId });
     if (!folder) {
-      throw new Error(`No se encontró la carpeta con ID ${params.folderId} o no tienes permisos para acceder a ella`);
+      logger.error('Folder not found', {
+        folderId: params.folderId,
+      });
+      throw new Error(`Folder with id ${params.folderId} not found.`);
     }
 
     const vehicleData = {
@@ -56,8 +67,25 @@ export class SolicitarCertificadoVehicleDataRetrievalUseCase extends BaseVehicle
       departamento: folder.vehicle.vehicleData.department,
     };
 
+    logger.info('Calling solicitarCertificadoSucive service', {
+      vehicleData,
+      requesterData: params.requesterData,
+      userId,
+    });
+
     // Call the SUCIVE certificate solicitation service with requester data - it will throw on error
-    const result = await dataRetrievalService.solicitarCertificadoSucive(userId, vehicleData, params.requesterData);
+    const result = await dataRetrievalService.solicitarCertificadoSucive(userId, vehicleData, params.requesterData, logger);
+
+    // Include the logs from the service
+    logger.addLogs(result.logs);
+    
+    if (result.success) {
+      logger.info('solicitarCertificadoSucive service succeeded');
+    } else {
+      logger.error('solicitarCertificadoSucive service failed', {
+        error: result.error,
+      });
+    }
 
     // If we get here, the service succeeded
     return {
@@ -65,14 +93,17 @@ export class SolicitarCertificadoVehicleDataRetrievalUseCase extends BaseVehicle
       imagePathsUrls: result.imagePathsUrls,
       pdfPathsUrls: result.pdfPathsUrls,
       videoPathsUrls: result.videoPathsUrls,
+      success: result.success,
+      error: result.error || undefined,
     };
   }
 
   // Public method that orchestrates the entire SUCIVE certificate solicitation workflow
   async generateSolicitarCertificadoVehicleDataRetrieval(
     params: GenerateSolicitarCertificadoVehicleDataRetrievalParams, 
-    userContext: ICurrentUserContext
+    userContext: ICurrentUserContext,
+    logger: Logger
   ): Promise<VehicleDataRetrieval> {
-    return this.generateVehicleDataRetrieval(params.folderId, params, userContext);
+    return this.generateVehicleDataRetrieval(params.folderId, params, userContext, logger);
   }
 } 

@@ -14,6 +14,7 @@ export type DataRetrievalCardProps = {
   description: string;
   existingRetrievals: PVehicleDataRetrieval[];
   user?: DefaultSession['user'];
+  addNewDataRetrieval: (dataRetrieval: PVehicleDataRetrieval) => void;
 }
 
 export const DataRetrievalCard = ({ 
@@ -22,7 +23,8 @@ export const DataRetrievalCard = ({
   label, 
   description, 
   existingRetrievals,
-  user
+  user,
+  addNewDataRetrieval
 }: DataRetrievalCardProps) => {
   const [isCardCollapsed, setIsCardCollapsed] = useState(true);
 
@@ -41,6 +43,7 @@ export const DataRetrievalCard = ({
           existingRetrievals={existingRetrievals}
           isCardCollapsed={isCardCollapsed}
           onToggleCollapse={() => setIsCardCollapsed(!isCardCollapsed)}
+          addNewDataRetrieval={addNewDataRetrieval}
         />
       );
 
@@ -55,6 +58,7 @@ export const DataRetrievalCard = ({
           user={user}
           isCardCollapsed={isCardCollapsed}
           onToggleCollapse={() => setIsCardCollapsed(!isCardCollapsed)}
+          addNewDataRetrieval={addNewDataRetrieval}
         />
       );
 
@@ -68,6 +72,7 @@ export const DataRetrievalCard = ({
           existingRetrievals={existingRetrievals}
           isCardCollapsed={isCardCollapsed}
           onToggleCollapse={() => setIsCardCollapsed(!isCardCollapsed)}
+          addNewDataRetrieval={addNewDataRetrieval}
         />
       );
 

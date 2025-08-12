@@ -1,6 +1,31 @@
 import mongoose from 'mongoose';
 import { VehicleDataRetrieval, VehicleDataRetrievalPrev } from '@/server/domain/entities/VehicleDataRetrieval';
-import { VehicleDataRetrievalType, VehicleDataRetrievalStatus } from '@/models/PScrapingResult';
+
+// Log entry schema for nested documents
+const LogEntrySchema = new mongoose.Schema({
+  timestamp: {
+    type: Number,
+    required: true
+  },
+  level: {
+    type: String,
+    enum: ['info', 'warn', 'error'],
+    required: true
+  },
+  message: {
+    type: String,
+    required: true
+  },
+  jsonData: {
+    type: String,
+    default: null
+  },
+  executionEnvironment: {
+    type: String,
+    enum: ['backend_processing', 'scraping_service'],
+    required: true
+  }
+}, { _id: false }); // Don't create _id for nested documents
 
 const VehicleDataRetrievalSchema = new mongoose.Schema({
   folderId: {
@@ -41,6 +66,11 @@ const VehicleDataRetrievalSchema = new mongoose.Schema({
   completedAt: {
     type: Date,
   },
+  // New logs field
+  logs: {
+    type: [LogEntrySchema],
+    default: []
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -71,6 +101,7 @@ export const VehicleDataRetrievalSchemaToDomain = (retrieval: any): VehicleDataR
     retrieval.videoUrls || [],
     retrieval.createdAt,
     retrieval.updatedAt,
+    retrieval.logs || [],
     retrieval.startedAt,
     retrieval.completedAt,
   );

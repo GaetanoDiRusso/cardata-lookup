@@ -1,3 +1,4 @@
+import { LogEntry, Logger } from '@/server/domain/utils/Logger';
 import { DATA_RETRIEVAL_SERVICE_URL } from '../../config';
 import { VehicleDataRetrievalType } from '@/models/PScrapingResult';
 
@@ -6,6 +7,9 @@ export interface IGenerateAndSaveScrappedDataRes<T> {
   pdfPathsUrls: string[];
   videoPathsUrls: string[];
   data: T;
+  logs: LogEntry[];
+  success: boolean;
+  error?: string;
 }
 
 export interface DataRetrievalServiceRequest {
@@ -26,9 +30,7 @@ export interface DataRetrievalServiceRequest {
   };
 }
 
-export interface DataRetrievalServiceResponse<T> extends IGenerateAndSaveScrappedDataRes<T> {
-  // Remove success and error properties since we now throw errors
-}
+export interface DataRetrievalServiceResponse<T> extends IGenerateAndSaveScrappedDataRes<T> {}
 
 export class DataRetrievalService {
   private readonly baseUrl: string;
@@ -42,10 +44,17 @@ export class DataRetrievalService {
    */
   private async makeRequest<T>(
     endpoint: string,
-    data: DataRetrievalServiceRequest
+    data: DataRetrievalServiceRequest,
+    logger: Logger
   ): Promise<DataRetrievalServiceResponse<T>> {
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const REQUEST_URL = `${this.baseUrl}${endpoint}`;
+      logger.info('Making request to data retrieval service', {
+        REQUEST_URL,
+        data,
+      });
+
+      const response = await fetch(REQUEST_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,15 +62,25 @@ export class DataRetrievalService {
         body: JSON.stringify(data),
       });
 
+      logger.info('Received response from data retrieval service', {
+        responseOk: response.ok,
+        responseStatus: response.status,
+      });
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        logger.error('Error calling data retrieval service', {
+          errorData,
+        });
         throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error(`Error calling data retrieval service at ${endpoint}:`, error);
+      logger.error('Error calling data retrieval service', {
+        error,
+      });
       // Throw the error instead of returning an error object
       throw error;
     }
@@ -72,12 +91,13 @@ export class DataRetrievalService {
    */
   async getInfractionsData(
     userId: string,
-    vehicleData: { matricula: string; padron: string; departamento?: string }
+    vehicleData: { matricula: string; padron: string; departamento?: string },
+    logger: Logger
   ): Promise<DataRetrievalServiceResponse<any>> {
     return this.makeRequest<any>('/api/infractions', {
       userId,
       vehicleData,
-    });
+    }, logger);
   }
 
   /**
@@ -85,12 +105,13 @@ export class DataRetrievalService {
    */
   async getDebtData(
     userId: string,
-    vehicleData: { matricula: string; padron: string; departamento?: string }
+    vehicleData: { matricula: string; padron: string; departamento?: string },
+    logger: Logger
   ): Promise<DataRetrievalServiceResponse<any>> {
     return this.makeRequest<any>('/api/debt', {
       userId,
       vehicleData,
-    });
+    }, logger);
   }
 
   /**
@@ -98,12 +119,13 @@ export class DataRetrievalService {
    */
   async getPaymentAgreementData(
     userId: string,
-    vehicleData: { matricula: string; padron: string; departamento?: string }
+    vehicleData: { matricula: string; padron: string; departamento?: string },
+    logger: Logger
   ): Promise<DataRetrievalServiceResponse<any>> {
     return this.makeRequest<any>('/api/payment-agreement', {
       userId,
       vehicleData,
-    });
+    }, logger);
   }
 
   /**
@@ -111,12 +133,13 @@ export class DataRetrievalService {
    */
   async getMatriculaRequeridaData(
     userId: string,
-    vehicleData: { matricula: string }
+    vehicleData: { matricula: string },
+    logger: Logger
   ): Promise<DataRetrievalServiceResponse<any>> {
     return this.makeRequest<any>('/api/matriculas-requeridas', {
       userId,
       vehicleData: { matricula: vehicleData.matricula },
-    });
+    }, logger);
   }
 
   /**
@@ -132,13 +155,14 @@ export class DataRetrievalService {
       email: string;
       phoneNumber?: string;
       address?: string;
-    }
+    },
+    logger: Logger
   ): Promise<DataRetrievalServiceResponse<any>> {
     return this.makeRequest<any>('/api/solicitar-certificado-sucive', {
       userId,
       vehicleData,
       requesterData,
-    });
+    }, logger);
   }
 
   /**
@@ -147,13 +171,14 @@ export class DataRetrievalService {
   async emitirCertificadoSucive(
     userId: string,
     vehicleData: { matricula: string; padron: string; departamento?: string },
+    logger: Logger,
     requestNumber?: string
   ): Promise<DataRetrievalServiceResponse<any>> {
     return this.makeRequest<any>('/api/emitir-certificado-sucive', {
       userId,
       vehicleData,
       requestNumber, // Pass requestNumber at root level
-    });
+    }, logger);
   }
 
   /**
@@ -163,6 +188,7 @@ export class DataRetrievalService {
     type: VehicleDataRetrievalType,
     userId: string,
     vehicleData: { matricula: string; padron?: string; departamento?: string },
+    logger: Logger,
     requestNumber?: string,
     requesterData?: {
       fullName: string;
@@ -173,6 +199,13 @@ export class DataRetrievalService {
       address?: string;
     }
   ): Promise<DataRetrievalServiceResponse<any>> {
+    logger.info('Retrieving data by type', {
+      type,
+      vehicleData,
+      requestNumber,
+      requesterData,
+    });
+
     switch (type) {
       case 'infracciones':
         if (!vehicleData.padron) {
@@ -182,7 +215,7 @@ export class DataRetrievalService {
           matricula: vehicleData.matricula, 
           padron: vehicleData.padron, 
           departamento: vehicleData.departamento 
-        });
+        }, logger);
       case 'deuda':
         if (!vehicleData.padron) {
           throw new Error('Padron is required for debt data retrieval');
@@ -191,7 +224,7 @@ export class DataRetrievalService {
           matricula: vehicleData.matricula, 
           padron: vehicleData.padron, 
           departamento: vehicleData.departamento 
-        });
+        }, logger);
       case 'consultar_convenio':
         if (!vehicleData.padron) {
           throw new Error('Padron is required for payment agreement data retrieval');
@@ -200,9 +233,9 @@ export class DataRetrievalService {
           matricula: vehicleData.matricula, 
           padron: vehicleData.padron, 
           departamento: vehicleData.departamento 
-        });
+        }, logger);
       case 'consultar_matricula':
-        return this.getMatriculaRequeridaData(userId, { matricula: vehicleData.matricula });
+        return this.getMatriculaRequeridaData(userId, { matricula: vehicleData.matricula }, logger);
       case 'solicitar_certificado':
         if (!vehicleData.padron) {
           throw new Error('Padron is required for certificado solicitation');
@@ -214,7 +247,7 @@ export class DataRetrievalService {
           matricula: vehicleData.matricula, 
           padron: vehicleData.padron, 
           departamento: vehicleData.departamento 
-        }, requesterData);
+        }, requesterData, logger);
       case 'certificado_sucive':
         if (!vehicleData.padron) {
           throw new Error('Padron is required for certificado emission');
@@ -223,7 +256,7 @@ export class DataRetrievalService {
           matricula: vehicleData.matricula, 
           padron: vehicleData.padron, 
           departamento: vehicleData.departamento 
-        }, requestNumber); // Pass requestNumber here
+        }, logger, requestNumber);
       default:
         throw new Error(`Unsupported data retrieval type: ${type}`);
     }

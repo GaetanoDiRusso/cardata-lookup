@@ -4,6 +4,7 @@ import { ICurrentUserContext } from '../../interfaces/ICurrentUserContext';
 import { BaseVehicleDataRetrievalUseCase } from './BaseVehicleDataRetrievalUseCase';
 import { dataRetrievalService } from '../../../data/scraping/DataRetrievalService';
 import { IVehicleDataRetrievalRepository } from '../../interfaces/IVehicleDataRetrievalRepository';
+import { Logger } from '../../utils/Logger';
 
 export interface GenerateInfractionsVehicleDataRetrievalParams {
   folderId: string;
@@ -29,18 +30,28 @@ export class InfraccionesVehicleDataRetrievalUseCase extends BaseVehicleDataRetr
 
   protected async callDataRetrievalService(
     userId: string, 
-    params: GenerateInfractionsVehicleDataRetrievalParams
+    params: GenerateInfractionsVehicleDataRetrievalParams,
+    logger: Logger
   ): Promise<{
     data: any;
     imagePathsUrls?: string[];
     pdfPathsUrls?: string[];
     videoPathsUrls?: string[];
+    success: boolean;
+    error?: string;
   }> {
     // Get folder and extract vehicle data
     const folder = await this.folderUseCases.findFolderById({ folderId: params.folderId }, { userId });
     if (!folder) {
-      throw new Error(`Folder with id ${params.folderId} not found or you don't have permission to access it`);
+      logger.error('Folder not found', {
+        folderId: params.folderId,
+      });
+      throw new Error(`Folder with id ${params.folderId} not found.`);
     }
+
+    logger.info('Folder found', {
+      folderId: params.folderId,
+    });
 
     const vehicleData = {
       matricula: folder.vehicle.vehicleData.plateNumber,
@@ -48,8 +59,24 @@ export class InfraccionesVehicleDataRetrievalUseCase extends BaseVehicleDataRetr
       departamento: folder.vehicle.vehicleData.department,
     };
 
+    logger.info('Calling getInfractionsData service', {
+      vehicleData,
+      userId,
+    });
+
     // Call the infractions service - it will throw on error
-    const result = await dataRetrievalService.getInfractionsData(userId, vehicleData);
+    const result = await dataRetrievalService.getInfractionsData(userId, vehicleData, logger);
+
+    // Include the logs from the service
+    logger.addLogs(result.logs);
+
+    if (result.success) {
+      logger.info('getInfractionsData service succeeded');
+    } else {
+      logger.error('getInfractionsData service failed', {
+        error: result.error,
+      });
+    }
 
     // If we get here, the service succeeded
     return {
@@ -57,29 +84,17 @@ export class InfraccionesVehicleDataRetrievalUseCase extends BaseVehicleDataRetr
       imagePathsUrls: result.imagePathsUrls,
       pdfPathsUrls: result.pdfPathsUrls,
       videoPathsUrls: result.videoPathsUrls,
+      success: result.success,
+      error: result.error || undefined,
     };
   }
 
   // Public method that orchestrates the entire infractions workflow
   async generateInfractionsVehicleDataRetrieval(
     params: GenerateInfractionsVehicleDataRetrievalParams, 
-    userContext: ICurrentUserContext
+    userContext: ICurrentUserContext,
+    logger: Logger
   ): Promise<VehicleDataRetrieval> {
-    return this.generateVehicleDataRetrieval(params.folderId, params, userContext);
-  }
-
-  // Keep the existing method for backward compatibility during transition
-  async getInfractionsVehicleDataRetrievalStatus(
-    params: { folderId: string },
-    userContext: ICurrentUserContext
-  ): Promise<VehicleDataRetrieval | null> {
-    const folder = await this.folderUseCases.findFolderById({ folderId: params.folderId }, userContext);
-    if (!folder) {
-      return null;
-    }
-
-    // This method would need to be updated to work with the new structure
-    // For now, return null to indicate it needs to be refactored
-    return null;
+    return this.generateVehicleDataRetrieval(params.folderId, params, userContext, logger);
   }
 }

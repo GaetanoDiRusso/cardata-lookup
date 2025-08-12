@@ -14,9 +14,13 @@ export type Params = {
   };
 };
 
-const FolderDetailView = ({ data }: Params) => {
+const FolderDetailView = ({ data: _data }: Params) => {
+  const { data, error, showError, closeError, addNewDataRetrieval } = useFolderDetailViewModel({ data: _data });
   const { folder, user } = data;
-  const { error, showError, closeError } = useFolderDetailViewModel({ data });
+
+  if (!folder) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -41,7 +45,7 @@ const FolderDetailView = ({ data }: Params) => {
           <section>
             <h2 className="text-xl font-semibold text-gray-700 mb-4">Consulta de Datos</h2>
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <DataRetrievalSection folder={folder} user={user} />
+              <DataRetrievalSection folder={folder} user={user} addNewDataRetrieval={addNewDataRetrieval} />
             </div>
           </section>
         </div>

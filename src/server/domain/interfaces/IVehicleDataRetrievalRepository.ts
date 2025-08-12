@@ -1,5 +1,6 @@
 import { VehicleDataRetrieval, VehicleDataRetrievalPrev } from '../entities/VehicleDataRetrieval';
 import { VehicleDataRetrievalType, VehicleDataRetrievalStatus } from '@/models/PScrapingResult';
+import { LogEntry } from '@/server/domain/utils/Logger';
 
 export interface ICreateVehicleDataRetrievalData {
   folderId: string;
@@ -9,6 +10,7 @@ export interface ICreateVehicleDataRetrievalData {
   imageUrls?: string[];
   pdfUrls?: string[];
   videoUrls?: string[];
+  logs?: LogEntry[];
 }
 
 export interface IUpdateVehicleDataRetrievalData {
@@ -19,6 +21,7 @@ export interface IUpdateVehicleDataRetrievalData {
   videoUrls?: string[];
   startedAt?: Date;
   completedAt?: Date;
+  logs?: LogEntry[];
 }
 
 export interface IVehicleDataRetrievalRepository {
