@@ -12,6 +12,19 @@ type Props = {} & Params
 const HomeView = ({ data }: Props) => {
   const { foldersPrev } = data;
 
+  // Show loading state while data is being fetched
+  if (!foldersPrev) {
+    return (
+      <main className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Mis Carpetas</h1>
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
+          <p className="text-gray-600">Cargando carpetas...</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Mis Carpetas</h1>
@@ -29,6 +42,6 @@ const HomeView = ({ data }: Props) => {
       )}
     </main>
   );
-} 
+}
 
 export default HomeView;

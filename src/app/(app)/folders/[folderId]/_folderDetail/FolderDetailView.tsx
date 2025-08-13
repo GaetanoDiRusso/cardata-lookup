@@ -19,7 +19,14 @@ const FolderDetailView = ({ data: _data }: Params) => {
   const { folder, user } = data;
 
   if (!folder) {
-    return <div>Loading...</div>;
+    return (
+      <main className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
+          <p className="text-gray-600">Cargando carpeta...</p>
+        </div>
+      </main>
+    );
   }
 
   return (
