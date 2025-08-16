@@ -2,9 +2,12 @@ import { VehicleDataRetrieval, VehicleDataRetrievalPrev } from '../../domain/ent
 import { IVehicleDataRetrievalRepository, ICreateVehicleDataRetrievalData, IUpdateVehicleDataRetrievalData } from '../../domain/interfaces/IVehicleDataRetrievalRepository';
 import { VehicleDataRetrievalType, VehicleDataRetrievalStatus } from '@/models/PScrapingResult';
 import VehicleDataRetrievalModel, { VehicleDataRetrievalSchemaToDomain, VehicleDataRetrievalSchemaToPrevDomain } from './VehicleDataRetrievalSchema';
+import { connectDB } from '../mongodb';
 
 export class VehicleDataRetrievalRepositoryMongoDBImp implements IVehicleDataRetrievalRepository {
   async create(data: ICreateVehicleDataRetrievalData): Promise<VehicleDataRetrieval> {
+    await connectDB()
+
     const vehicleDataRetrieval = new VehicleDataRetrievalModel({
       folderId: data.folderId,
       dataRetrievalType: data.dataRetrievalType,
@@ -21,26 +24,36 @@ export class VehicleDataRetrievalRepositoryMongoDBImp implements IVehicleDataRet
   }
 
   async findById(id: string): Promise<VehicleDataRetrieval | null> {
+    await connectDB()
+
     const result = await VehicleDataRetrievalModel.findById(id);
     return result ? VehicleDataRetrievalSchemaToDomain(result) : null;
   }
 
   async findByFolderIdAndType(folderId: string, dataRetrievalType: VehicleDataRetrievalType): Promise<VehicleDataRetrieval | null> {
+    await connectDB()
+
     const result = await VehicleDataRetrievalModel.findOne({ folderId, dataRetrievalType }).sort({ createdAt: -1 });
     return result ? VehicleDataRetrievalSchemaToDomain(result) : null;
   }
 
   async findAllByFolderId(folderId: string): Promise<VehicleDataRetrieval[]> {
+    await connectDB()
+
     const results = await VehicleDataRetrievalModel.find({ folderId }).sort({ createdAt: -1 });
     return results.map(VehicleDataRetrievalSchemaToDomain);
   }
 
   async findAllPrevByFolderId(folderId: string): Promise<VehicleDataRetrievalPrev[]> {
+    await connectDB()
+
     const results = await VehicleDataRetrievalModel.find({ folderId }).sort({ createdAt: -1 });
     return results.map(VehicleDataRetrievalSchemaToPrevDomain);
   }
 
   async update(id: string, data: IUpdateVehicleDataRetrievalData): Promise<VehicleDataRetrieval> {
+    await connectDB()
+
     const updateData: any = {
       updatedAt: new Date(),
     };
@@ -71,14 +84,20 @@ export class VehicleDataRetrievalRepositoryMongoDBImp implements IVehicleDataRet
   }
 
   async updateStatus(id: string, status: VehicleDataRetrievalStatus): Promise<VehicleDataRetrieval> {
+    await connectDB()
+
     return await this.update(id, { status });
   }
 
   async delete(id: string): Promise<void> {
+    await connectDB()
+
     await VehicleDataRetrievalModel.findByIdAndDelete(id);
   }
 
   async deleteByFolderId(folderId: string): Promise<void> {
+    await connectDB()
+
     await VehicleDataRetrievalModel.deleteMany({ folderId });
   }
 } 
