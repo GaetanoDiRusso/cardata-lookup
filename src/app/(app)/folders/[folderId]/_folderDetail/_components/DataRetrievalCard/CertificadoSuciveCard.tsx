@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PVehicleDataRetrieval, VehicleDataRetrievalType } from '@/models/PScrapingResult';
-import { callServerAction } from '@/utils/server-actions.utils';
-import { generateCertificadoSuciveDataRetrieval } from '@/server/infraestructure/server-actions/VehicleDataRetrievalActions';
+import { generateCertificadoSuciveDataRetrieval } from '@/services';
 import { DataRetrievalHeader } from './DataRetrievalHeader';
 import { MobileActionButton } from './MobileActionButton';
 import { ErrorMessage } from './ErrorMessage';
@@ -51,10 +50,10 @@ export const CertificadoSuciveCard: React.FC<CertificadoSuciveCardProps> = ({
         return;
       }
 
-      const result = await callServerAction(generateCertificadoSuciveDataRetrieval({
+      const result = await generateCertificadoSuciveDataRetrieval({
         folderId,
         requestNumber: requestNumber.trim(),
-      }));
+      });
 
       addNewDataRetrieval(result);
     } catch (error: any) {

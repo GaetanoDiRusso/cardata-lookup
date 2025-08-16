@@ -24,7 +24,7 @@ export const DataRetrievalCard = ({
   description, 
   existingRetrievals,
   user,
-  addNewDataRetrieval
+  addNewDataRetrieval,
 }: DataRetrievalCardProps) => {
   const [isCardCollapsed, setIsCardCollapsed] = useState(true);
 

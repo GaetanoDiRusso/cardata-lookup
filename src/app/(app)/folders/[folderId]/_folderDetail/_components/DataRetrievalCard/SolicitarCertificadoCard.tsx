@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PVehicleDataRetrieval, VehicleDataRetrievalType } from '@/models/PScrapingResult';
-import { callServerAction } from '@/utils/server-actions.utils';
-import { generateSolicitarCertificadoDataRetrieval } from '@/server/infraestructure/server-actions/VehicleDataRetrievalActions';
+import { generateSolicitarCertificadoDataRetrieval } from '@/services';
 import { DefaultSession } from 'next-auth';
 import { DataRetrievalHeader } from './DataRetrievalHeader';
 import { MobileActionButton } from './MobileActionButton';
@@ -78,7 +77,7 @@ export const SolicitarCertificadoCard: React.FC<SolicitarCertificadoCardProps> =
         return;
       }
 
-      const result = await callServerAction(generateSolicitarCertificadoDataRetrieval({
+      const result = await generateSolicitarCertificadoDataRetrieval({
         folderId,
         userData: {
           fullName: fullName.trim(),
@@ -88,7 +87,7 @@ export const SolicitarCertificadoCard: React.FC<SolicitarCertificadoCardProps> =
           phoneNumber: phoneNumber.trim(),
           address: address.trim(),
         }
-      }));
+      });
 
       addNewDataRetrieval(result);
     } catch (error: any) {

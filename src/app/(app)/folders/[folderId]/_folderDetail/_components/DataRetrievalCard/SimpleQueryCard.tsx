@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { PVehicleDataRetrieval, VehicleDataRetrievalType } from '@/models/PScrapingResult';
-import { callServerAction } from '@/utils/server-actions.utils';
-import { 
-  generateInfractionsDataRetrieval,
-  generateDebtDataRetrieval,
-  generateMatriculaDataRetrieval,
-  generatePaymentAgreementDataRetrieval
-} from '@/server/infraestructure/server-actions/VehicleDataRetrievalActions';
 import { DataRetrievalHeader } from './DataRetrievalHeader';
 import { MobileActionButton } from './MobileActionButton';
 import { ErrorMessage } from './ErrorMessage';
 import { DataRetrievalResults } from './DataRetrievalResults';
+import {
+  generateDebtDataRetrieval,
+  generateInfractionsDataRetrieval,
+  generateMatriculaDataRetrieval,
+  generatePaymentAgreementDataRetrieval,
+} from '@/services';
 
 export type SimpleQueryCardProps = {
   folderId: string;
@@ -40,16 +39,16 @@ export const SimpleQueryCard: React.FC<SimpleQueryCardProps> = ({
     return 'Consultar';
   };
 
-  const getServerAction = async () => {
+  const generateDataRetrieval = async () => {
     switch (retrievalType) {
       case 'infracciones':
-        return await callServerAction(generateInfractionsDataRetrieval({ folderId }));
+        return await generateInfractionsDataRetrieval({ folderId });
       case 'deuda':
-        return await callServerAction(generateDebtDataRetrieval({ folderId }));
+        return await generateDebtDataRetrieval({ folderId });
       case 'consultar_matricula':
-        return await callServerAction(generateMatriculaDataRetrieval({ folderId }));
+        return await generateMatriculaDataRetrieval({ folderId });
       case 'consultar_convenio':
-        return await callServerAction(generatePaymentAgreementDataRetrieval({ folderId }));
+        return await generatePaymentAgreementDataRetrieval({ folderId });
       default:
         throw new Error(`Tipo de consulta no soportado: ${retrievalType}`);
     }
@@ -60,11 +59,10 @@ export const SimpleQueryCard: React.FC<SimpleQueryCardProps> = ({
       setIsLoading(true);
       setError(null);
 
-      const result = await getServerAction();
+      const result = await generateDataRetrieval();
 
       addNewDataRetrieval(result);
     } catch (error: any) {
-      console.error('Error in handleRetrieveData:', error);
       setError(error.message || 'Error inesperado al procesar la solicitud');
     } finally {
       setIsLoading(false);
