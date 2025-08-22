@@ -8,7 +8,7 @@ export const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || '';
 export const NEXTAUTH_URL = process.env.NEXTAUTH_URL || '';
 
 // Service Configuration
-export const DATA_RETRIEVAL_SERVICE_URL = process.env.DATA_RETRIEVAL_SERVICE_URL;
+export const DATA_RETRIEVAL_SERVICE_URL = process.env.DATA_RETRIEVAL_SERVICE_URL || '';
 
 // Environment Configuration
 export const NODE_ENV = process.env.NODE_ENV || 'development';
