@@ -15,6 +15,7 @@ export type CertificadoSuciveCardProps = {
   isCardCollapsed: boolean;
   onToggleCollapse: () => void;
   addNewDataRetrieval: (dataRetrieval: PVehicleDataRetrieval) => void;
+  newDataRetrievalIds: Set<string>;
 };
 
 export const CertificadoSuciveCard: React.FC<CertificadoSuciveCardProps> = ({
@@ -25,7 +26,8 @@ export const CertificadoSuciveCard: React.FC<CertificadoSuciveCardProps> = ({
   existingRetrievals,
   isCardCollapsed,
   onToggleCollapse,
-  addNewDataRetrieval
+  addNewDataRetrieval,
+  newDataRetrievalIds
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +126,7 @@ export const CertificadoSuciveCard: React.FC<CertificadoSuciveCardProps> = ({
           <DataRetrievalResults
             existingRetrievals={existingRetrievals}
             retrievalType={retrievalType}
+            newDataRetrievalIds={newDataRetrievalIds}
           />
         </div>
       )}

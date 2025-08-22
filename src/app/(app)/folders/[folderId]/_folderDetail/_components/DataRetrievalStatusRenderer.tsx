@@ -114,20 +114,38 @@ const renderPaymentAgreementStatus = (data: any) => {
 // Solicitar Certificado status renderer
 const renderSolicitarCertificadoStatus = (data: any) => {
   const transactionNumber = data.transactionNumber;
+  const isCertificateAlreadyRequested = data.isCertificateAlreadyRequested;
 
-  if (!transactionNumber) {
+  // If no data at all, return null
+  if (!data) {
     return null;
   }
 
   return (
-    <div className="mb-3 p-3 rounded border bg-yellow-50 border-yellow-200">
-      <div className="flex items-center">
-        <span className="mr-2">📄</span>
-        <p className="text-sm font-medium text-yellow-700">
-          Solicitud de certificado SUCIVE completada. Número de tramite: <span className="font-bold text-black">{transactionNumber}</span>
-        </p>
-      </div>
-    </div>
+    <>
+      {isCertificateAlreadyRequested && (
+        <div className="mb-3 p-3 rounded border bg-orange-50 border-orange-200">
+          <div className="flex items-center">
+            <span className="mr-2">⚠️</span>
+            <p className="text-sm font-medium text-orange-700">
+              Ya existe un trámite pendiente de pago por matrícula, padrón y departamento ingresado.
+              <br />
+              Por favor corrobore la solicitud que tiene activa
+            </p>
+          </div>
+        </div>
+      )}
+      {transactionNumber && (
+        <div className="mb-3 p-3 rounded border bg-yellow-50 border-yellow-200">
+          <div className="flex items-center">
+            <span className="mr-2">📄</span>
+            <p className="text-sm font-medium text-yellow-700">
+              Solicitud de certificado SUCIVE completada. Número de tramite: <span className="font-bold text-black">{transactionNumber}</span>
+            </p>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

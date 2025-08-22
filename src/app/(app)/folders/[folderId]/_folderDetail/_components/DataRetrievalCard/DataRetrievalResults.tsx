@@ -12,11 +12,13 @@ import { DataRetrievalStatusRenderer } from '../DataRetrievalStatusRenderer';
 export type DataRetrievalResultsProps = {
   existingRetrievals: PVehicleDataRetrieval[];
   retrievalType: VehicleDataRetrievalType;
+  newDataRetrievalIds: Set<string>;
 };
 
 export const DataRetrievalResults: React.FC<DataRetrievalResultsProps> = ({
   existingRetrievals,
-  retrievalType
+  retrievalType,
+  newDataRetrievalIds
 }) => {
   const [showOlderResults, setShowOlderResults] = useState(false);
   const hasResults = existingRetrievals.length > 0;
@@ -29,6 +31,9 @@ export const DataRetrievalResults: React.FC<DataRetrievalResultsProps> = ({
   // Get the latest result and older results
   const latestRetrieval = sortedRetrievals[0];
   const olderRetrievals = sortedRetrievals.slice(1);
+
+  // Check if the latest retrieval is newly added
+  const isLatestRetrievalNew = latestRetrieval ? newDataRetrievalIds.has(latestRetrieval.id) : false;
 
   const renderRetrievalItem = (retrieval: PVehicleDataRetrieval) => {
     const availableMedia = getAvailableMedia(retrieval);
@@ -133,8 +138,15 @@ export const DataRetrievalResults: React.FC<DataRetrievalResultsProps> = ({
           {/* Latest Result - Always visible */}
           {latestRetrieval && (
             <div className="relative">
-              {olderRetrievals.length > 0 && (
+              {/* Show "Nuevo!" for newly added retrievals (priority over "Más reciente") */}
+              {isLatestRetrievalNew && (
                 <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full shadow-sm z-10">
+                  Nuevo!
+                </div>
+              )}
+              {/* Show "Más reciente" only when there are older results and it's not newly added */}
+              {!isLatestRetrievalNew && olderRetrievals.length > 0 && (
+                <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-sm z-10">
                   Más reciente
                 </div>
               )}

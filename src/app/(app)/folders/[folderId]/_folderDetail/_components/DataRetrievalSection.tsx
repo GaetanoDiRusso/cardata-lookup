@@ -2,11 +2,14 @@ import { PFolder } from '@/models/PFolder';
 import { DataRetrievalCard } from './DataRetrievalCard';
 import { PVehicleDataRetrieval, VehicleDataRetrievalType } from '@/models/PScrapingResult';
 import { DefaultSession } from 'next-auth';
+import { SolicitarCertificadoFormData } from '@/server/domain/entities/SolicitarCertificadoFormData';
 
 export type DataRetrievalSectionProps = {
   folder: PFolder;
   user?: DefaultSession['user']; // Using any for now, we can refine this later
+  prefilledData?: SolicitarCertificadoFormData;
   addNewDataRetrieval: (dataRetrieval: PVehicleDataRetrieval) => void;
+  newDataRetrievalIds: Set<string>;
 }
 
 const DATA_RETRIEVAL_TYPES: { type: VehicleDataRetrievalType; label: string; description: string }[] = [
@@ -42,7 +45,7 @@ const DATA_RETRIEVAL_TYPES: { type: VehicleDataRetrievalType; label: string; des
   }
 ];
 
-export const DataRetrievalSection = ({ folder, user, addNewDataRetrieval }: DataRetrievalSectionProps) => {
+export const DataRetrievalSection = ({ folder, user, prefilledData, addNewDataRetrieval, newDataRetrievalIds }: DataRetrievalSectionProps) => {
   return (
     <div className="space-y-6">
       <div className="mb-4">
@@ -64,7 +67,9 @@ export const DataRetrievalSection = ({ folder, user, addNewDataRetrieval }: Data
               retrieval => retrieval.dataRetrievalType === retrievalType.type
             )}
             user={user}
+            prefilledData={prefilledData}
             addNewDataRetrieval={addNewDataRetrieval}
+            newDataRetrievalIds={newDataRetrievalIds}
           />
         ))}
       </div>

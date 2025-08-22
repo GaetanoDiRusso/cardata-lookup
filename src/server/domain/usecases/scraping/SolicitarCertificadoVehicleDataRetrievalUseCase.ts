@@ -1,5 +1,6 @@
 import { BaseVehicleDataRetrievalUseCase } from './BaseVehicleDataRetrievalUseCase';
 import { VehicleDataRetrievalType } from '@/models/PScrapingResult';
+import { SolicitarCertificadoFormData } from '../../entities/SolicitarCertificadoFormData';
 import { FolderUseCases } from '../folder/FolderUseCases';
 import { ICurrentUserContext } from '../../interfaces/ICurrentUserContext';
 import { VehicleDataRetrieval } from '../../entities/VehicleDataRetrieval';
@@ -9,14 +10,7 @@ import { Logger } from '../../utils/Logger';
 
 export type GenerateSolicitarCertificadoVehicleDataRetrievalParams = {
   folderId: string;
-  requesterData: {
-    fullName: string;
-    identificationType: 'CI' | 'RUT';
-    identificationNumber: string;
-    email: string;
-    phoneNumber?: string;
-    address?: string;
-  };
+  requesterData: SolicitarCertificadoFormData;
 };
 
 export class SolicitarCertificadoVehicleDataRetrievalUseCase extends BaseVehicleDataRetrievalUseCase {
@@ -89,7 +83,10 @@ export class SolicitarCertificadoVehicleDataRetrievalUseCase extends BaseVehicle
 
     // If we get here, the service succeeded
     return {
-      data: result.data,
+      data: {
+        ...result.data,
+        requesterData: params.requesterData, // Store the requester data for future use
+      },
       imagePathsUrls: result.imagePathsUrls,
       pdfPathsUrls: result.pdfPathsUrls,
       videoPathsUrls: result.videoPathsUrls,

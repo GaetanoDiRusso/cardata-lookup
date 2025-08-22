@@ -34,10 +34,15 @@ const HomeView = ({ data }: Props) => {
           <p className="text-gray-600">No tienes vehículos registrados.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {foldersPrev.map((folder) => (
-            <FolderCard key={folder.id} folder={folder} />
-          ))}
+        <div>
+          <p className="text-sm text-gray-500 mb-4">
+            Ordenadas por fecha de creación (más recientes primero)
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {foldersPrev.map((folder) => (
+              <FolderCard key={folder.id} folder={folder} />
+            ))}
+          </div>
         </div>
       )}
     </main>

@@ -4,7 +4,8 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { connectDB } from '@/server/data/mongodb'
 import { AuthUseCase } from '@/server/domain/usecases/auth/AuthUseCases'
 import { UserRepositoryMongoDBImp } from '@/server/data/user/UserRepositoryMongoDBImp'
-import { GOOGLE_ID, GOOGLE_SECRET } from '@/server/config'
+import { GOOGLE_ID, GOOGLE_SECRET, NEXTAUTH_SECRET } from '@/server/config'
+import { AUTH_COOKIE_NAME } from '@/constants/authConfig'
 
 const userRepository = new UserRepositoryMongoDBImp()
 const authUseCase = new AuthUseCase(userRepository)
@@ -91,12 +92,12 @@ export const authOptions: AuthOptions = {
       strategy: 'jwt',
       maxAge: 30 * 24 * 60 * 60, // 30 days
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: NEXTAUTH_SECRET,
     debug: true, // Enable debug mode in production temporarily
     // Fix cookie configuration for production
     cookies: {
       sessionToken: {
-        name: '__Secure-next-auth.session-token',
+        name: AUTH_COOKIE_NAME,
         options: {
           httpOnly: true,
           sameSite: 'lax',

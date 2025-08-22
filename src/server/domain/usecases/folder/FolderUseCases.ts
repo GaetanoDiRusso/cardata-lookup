@@ -51,7 +51,14 @@ export class FolderUseCases {
     }
 
     async findFoldersPrevByUserId(_params: {}, userContext: ICurrentUserContext): Promise<FolderPrev[]> {
-        return await this.folderRepository.findAllPrevByUserId(userContext.userId);
+        const folders = await this.folderRepository.findAllPrevByUserId(userContext.userId);
+        
+        // Sort folders by createdAt date in descending order (newest first)
+        return folders.sort((a, b) => {
+            const dateA = a.createdAt.getTime();
+            const dateB = b.createdAt.getTime();
+            return dateB - dateA; // Descending order (newest first)
+        });
     }
 
     async findFolderById(params: FindFolderByIdParams, userContext: ICurrentUserContext): Promise<Folder | null> {
@@ -87,11 +94,25 @@ export class FolderUseCases {
     }
 
     async findFoldersByVehicleRegistration(params: FindFoldersByVehicleRegistrationParams, userContext: ICurrentUserContext): Promise<FolderPrev[]> {
-        return await this.folderRepository.findByVehicleRegistration(params.registrationNumber);
+        const folders = await this.folderRepository.findByVehicleRegistration(params.registrationNumber);
+        
+        // Sort folders by createdAt date in descending order (newest first)
+        return folders.sort((a, b) => {
+            const dateA = a.createdAt.getTime();
+            const dateB = b.createdAt.getTime();
+            return dateB - dateA; // Descending order (newest first)
+        });
     }
 
     async findFoldersByPersonIdentification(params: FindFoldersByPersonIdentificationParams, userContext: ICurrentUserContext): Promise<FolderPrev[]> {
-        return await this.folderRepository.findByPersonIdentification(params.identificationNumber);
+        const folders = await this.folderRepository.findByPersonIdentification(params.identificationNumber);
+        
+        // Sort folders by createdAt date in descending order (newest first)
+        return folders.sort((a, b) => {
+            const dateA = a.createdAt.getTime();
+            const dateB = b.createdAt.getTime();
+            return dateB - dateA; // Descending order (newest first)
+        });
     }
 
     async deleteFolder(params: DeleteFolderParams, userContext: ICurrentUserContext): Promise<boolean> {

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { VehicleDataRetrieval, VehicleDataRetrievalPrev } from '../../domain/entities/VehicleDataRetrieval';
 import { IVehicleDataRetrievalRepository, ICreateVehicleDataRetrievalData, IUpdateVehicleDataRetrievalData } from '../../domain/interfaces/IVehicleDataRetrievalRepository';
 import { VehicleDataRetrievalType, VehicleDataRetrievalStatus } from '@/models/PScrapingResult';
@@ -50,6 +51,49 @@ export class VehicleDataRetrievalRepositoryMongoDBImp implements IVehicleDataRet
     const results = await VehicleDataRetrievalModel.find({ folderId }).sort({ createdAt: -1 });
     return results.map(VehicleDataRetrievalSchemaToPrevDomain);
   }
+
+  async findLatestByTypeAndUser(dataRetrievalType: VehicleDataRetrievalType, userId: string): Promise<VehicleDataRetrieval | null> {
+    await connectDB()
+
+    // Convert userId string to ObjectId for proper MongoDB comparison
+    const userIdObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Find the latest retrieval of the specified type for the user
+    // We need to join with folders to get the user ID
+    const result = await VehicleDataRetrievalModel.aggregate([
+      {
+        $lookup: {
+          from: 'folders',
+          localField: 'folderId',
+          foreignField: '_id',
+          as: 'folder'
+        }
+      },
+      {
+        $unwind: '$folder'
+      },
+      {
+        $match: {
+          'folder.ownerId': userIdObjectId,
+          dataRetrievalType: dataRetrievalType
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $limit: 1
+      }
+    ]);
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    return VehicleDataRetrievalSchemaToDomain(result[0]);
+  }
+
+
 
   async update(id: string, data: IUpdateVehicleDataRetrievalData): Promise<VehicleDataRetrieval> {
     await connectDB()

@@ -7,7 +7,7 @@ import { authOptions } from "@/app/api/auth/authOptions";
 import { revalidatePath } from "next/cache";
 import { getHomeRoute } from "@/constants/navigationRoutes";
 import { PVehicleDataRetrieval } from "@/models/PScrapingResult";
-import { infractionsVehicleDataRetrievalUseCase, debtVehicleDataRetrievalUseCase, matriculaVehicleDataRetrievalUseCase, paymentAgreementVehicleDataRetrievalUseCase, certificadoSuciveVehicleDataRetrievalUseCase, solicitarCertificadoVehicleDataRetrievalUseCase } from "@/server/di";
+import { infractionsVehicleDataRetrievalUseCase, debtVehicleDataRetrievalUseCase, matriculaVehicleDataRetrievalUseCase, paymentAgreementVehicleDataRetrievalUseCase, certificadoSuciveVehicleDataRetrievalUseCase, solicitarCertificadoVehicleDataRetrievalUseCase, vehicleDataRetrievalUseCase } from "@/server/di";
 import { ICurrentUserContext } from "@/server/domain/interfaces/ICurrentUserContext";
 import { Logger } from "@/server/domain/utils/Logger";
 
@@ -279,6 +279,50 @@ export const generateCertificadoSuciveDataRetrieval = async (data: GenerateCerti
     return {
       ok: false,
       error: createCustomErrorResponse(new CustomError(errorCodeEnum.INTERNAL_SERVER_ERROR, 'Error al generar emisión de certificado SUCIVE')),
+    }
+  }
+};
+
+export const getPrefilledSolicitarCertificadoData = async (): Promise<ServerActionResponse<{
+  fullName: string;
+  identificationType: 'CI' | 'RUT';
+  identificationNumber: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+}>> => {
+  const session = await getServerSession(authOptions);
+  const theError = new CustomError(errorCodeEnum.INVALID_SESSION, errorMessageEnum.INVALID_SESSION);
+  if (!(session?.user as any)?.id) {
+    return {
+      ok: false,
+      error: createCustomErrorResponse(theError),
+    }
+  }
+
+  const userContext: ICurrentUserContext = {
+    userId: (session?.user as any).id,
+  };
+
+  try {
+    const logger = new Logger(userContext.userId, 'getPrefilledSolicitarCertificadoData Server Action');
+    logger.info('Starting getPrefilledSolicitarCertificadoData');
+
+    // Get prefilled data from the use case
+    const prefilledData = await vehicleDataRetrievalUseCase.getPrefilledSolicitarCertificadoData(
+      userContext,
+      { name: session?.user?.name, email: session?.user?.email }
+    );
+
+    return {
+      ok: true,
+      data: prefilledData
+    };
+
+  } catch (error) {
+    return {
+      ok: false,
+      error: createCustomErrorResponse(new CustomError(errorCodeEnum.INTERNAL_SERVER_ERROR, 'Error al obtener datos prefilled')),
     }
   }
 };

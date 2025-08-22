@@ -6,6 +6,7 @@ import { DataRetrievalHeader } from './DataRetrievalHeader';
 import { MobileActionButton } from './MobileActionButton';
 import { ErrorMessage } from './ErrorMessage';
 import { DataRetrievalResults } from './DataRetrievalResults';
+import { SolicitarCertificadoFormData } from '@/server/domain/entities/SolicitarCertificadoFormData';
 
 export type SolicitarCertificadoCardProps = {
   folderId: string;
@@ -14,9 +15,11 @@ export type SolicitarCertificadoCardProps = {
   description: string;
   existingRetrievals: PVehicleDataRetrieval[];
   user?: DefaultSession['user'];
+  prefilledData?: SolicitarCertificadoFormData;
   isCardCollapsed: boolean;
   onToggleCollapse: () => void;
   addNewDataRetrieval: (dataRetrieval: PVehicleDataRetrieval) => void;
+  newDataRetrievalIds: Set<string>;
 };
 
 export const SolicitarCertificadoCard: React.FC<SolicitarCertificadoCardProps> = ({
@@ -26,21 +29,22 @@ export const SolicitarCertificadoCard: React.FC<SolicitarCertificadoCardProps> =
   description,
   existingRetrievals,
   user,
+  prefilledData,
   isCardCollapsed,
   onToggleCollapse,
-  addNewDataRetrieval
+  addNewDataRetrieval,
+  newDataRetrievalIds
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // User data state for solicitar certificado
-  const [useMyData, setUseMyData] = useState(true);
-  const [fullName, setFullName] = useState(user?.name || '');
-  const [identificationType, setIdentificationType] = useState<'CI' | 'RUT'>('CI');
-  const [identificationNumber, setIdentificationNumber] = useState('');
-  const [email, setEmail] = useState(user?.email || '');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [address, setAddress] = useState('');
+  const [fullName, setFullName] = useState(prefilledData?.fullName || user?.name || '');
+  const [identificationType, setIdentificationType] = useState<'CI' | 'RUT'>(prefilledData?.identificationType || 'CI');
+  const [identificationNumber, setIdentificationNumber] = useState(prefilledData?.identificationNumber || '');
+  const [email, setEmail] = useState(prefilledData?.email || user?.email || '');
+  const [phoneNumber, setPhoneNumber] = useState(prefilledData?.phoneNumber || '');
+  const [address, setAddress] = useState(prefilledData?.address || '');
 
   const buttonText = 'Solicitar';
 
@@ -137,24 +141,11 @@ export const SolicitarCertificadoCard: React.FC<SolicitarCertificadoCardProps> =
               <div className="flex items-center mb-3">
                 <span className="mr-2">👤</span>
                 <label className="text-sm font-medium text-green-700">
-                  Datos del Solicitante
+                  Datos del Solicitante (prellenados con la última consulta)
                 </label>
               </div>
               
-              {/* Use My Data Checkbox */}
-              <div className="mb-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={useMyData}
-                    onChange={(e) => setUseMyData(e.target.checked)}
-                    className="mr-2 rounded border-gray-300 text-green-600 focus:ring-green-500"
-                  />
-                  <span className="text-sm text-green-700">
-                    Usar mis datos de perfil (recomendado)
-                  </span>
-                </label>
-              </div>
+
 
               {/* User Data Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,6 +256,7 @@ export const SolicitarCertificadoCard: React.FC<SolicitarCertificadoCardProps> =
           <DataRetrievalResults
             existingRetrievals={existingRetrievals}
             retrievalType={retrievalType}
+            newDataRetrievalIds={newDataRetrievalIds}
           />
         </div>
       )}

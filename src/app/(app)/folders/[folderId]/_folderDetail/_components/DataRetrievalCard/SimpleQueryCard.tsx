@@ -20,6 +20,7 @@ export type SimpleQueryCardProps = {
   isCardCollapsed: boolean;
   onToggleCollapse: () => void;
   addNewDataRetrieval: (dataRetrieval: PVehicleDataRetrieval) => void;
+  newDataRetrievalIds: Set<string>;
 };
 
 export const SimpleQueryCard: React.FC<SimpleQueryCardProps> = ({
@@ -30,7 +31,8 @@ export const SimpleQueryCard: React.FC<SimpleQueryCardProps> = ({
   existingRetrievals,
   isCardCollapsed,
   onToggleCollapse,
-  addNewDataRetrieval
+  addNewDataRetrieval,
+  newDataRetrievalIds
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +102,7 @@ export const SimpleQueryCard: React.FC<SimpleQueryCardProps> = ({
           <DataRetrievalResults
             existingRetrievals={existingRetrievals}
             retrievalType={retrievalType}
+            newDataRetrievalIds={newDataRetrievalIds}
           />
         </div>
       )}

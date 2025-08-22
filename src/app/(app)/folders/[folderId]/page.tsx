@@ -1,6 +1,7 @@
 import React from "react";
 import { callServerAction } from "@/utils/server-actions.utils";
 import { getFolderById } from "@/server/infraestructure/server-actions/FolderActions";
+import { getPrefilledSolicitarCertificadoData } from "@/server/infraestructure/server-actions/VehicleDataRetrievalActions";
 import { PFolder } from "@/models/PFolder";
 import FolderDetailView from "./_folderDetail/FolderDetailView";
 import { getServerSession } from "next-auth";
@@ -9,12 +10,23 @@ import { authOptions } from "@/app/api/auth/authOptions";
 const FolderDetail = async ({ params }: { params: Promise<{ folderId: string }> }) => {
   const { folderId } = await params;
   let folder: PFolder | null = null;
+  let prefilledData: any = null;
   
   // Get current user session
   const session = await getServerSession(authOptions);
   
   try {
     folder = await callServerAction(getFolderById(folderId));
+    
+    // Get prefilled data for solicitar certificado form
+    if (session?.user) {
+      try {
+        prefilledData = await callServerAction(getPrefilledSolicitarCertificadoData());
+      } catch (error) {
+        console.error('Error fetching prefilled data:', error);
+        // Continue without prefilled data
+      }
+    }
   } catch (error) {
     return (
       <main className="container mx-auto px-4 py-8">
@@ -33,7 +45,7 @@ const FolderDetail = async ({ params }: { params: Promise<{ folderId: string }> 
   }
 
   return (
-    <FolderDetailView data={{ folder, user: session?.user }} />
+    <FolderDetailView data={{ folder, user: session?.user, prefilledData }} />
   );
 };
 

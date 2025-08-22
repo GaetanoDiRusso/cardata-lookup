@@ -1,8 +1,5 @@
 import mongoose from 'mongoose';
 import { MONGODB_URI } from '../config';
-if (!process.env.MONGODB_URI) {
-  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
-}
 
 export async function connectDB() {
   try {

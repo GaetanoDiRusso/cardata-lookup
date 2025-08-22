@@ -3,6 +3,8 @@ import { getToken } from 'next-auth/jwt';
 import { AUTH_ROUTES } from './constants/authRoutes';
 import { getLoginRoute } from './constants/navigationRoutes';
 import { TESTING_BASE_PATH, isTestingEnabled } from './constants/testingRoutes';
+import { NEXTAUTH_SECRET } from './server/config';
+import { AUTH_COOKIE_NAME } from './constants/authConfig';
 
 const authRoutes = AUTH_ROUTES;
 
@@ -15,14 +17,11 @@ export default async function middleware(req: NextRequest) {
   }
   
   const isAuthPath = authRoutes.some((route) => path.startsWith(route));
-  const secret = process.env.NEXTAUTH_SECRET || "";
+  const secret = NEXTAUTH_SECRET;
   
-  // Use the correct cookie name based on environment
-  const isProduction = process.env.NODE_ENV === 'production';
-  const cookieName = isProduction ? '__Secure-next-auth.session-token' : 'next-auth.session-token';
+  const isLoggedIn = await getToken({ req, secret, cookieName: AUTH_COOKIE_NAME });
+  console.log('GAETA :: isLoggedIn', isLoggedIn);
   
-  const isLoggedIn = await getToken({ req, secret, cookieName });
-
   // Users that are already logged in should not be able to access public (auth) paths (login, signup, forgot password..)
   if (isAuthPath && isLoggedIn) {
     const url = req.nextUrl.clone();

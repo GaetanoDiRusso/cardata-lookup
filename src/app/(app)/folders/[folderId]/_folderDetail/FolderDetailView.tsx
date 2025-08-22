@@ -6,17 +6,19 @@ import { DataRetrievalSection } from './_components/DataRetrievalSection';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import useFolderDetailViewModel from './useFolderDetailViewModel';
 import { DefaultSession } from 'next-auth';
+import { SolicitarCertificadoFormData } from '@/server/domain/entities/SolicitarCertificadoFormData';
 
 export type Params = {
   data: {
     folder: PFolder;
     user?: DefaultSession['user']; // Using any for now, we can refine this later
+    prefilledData?: SolicitarCertificadoFormData;
   };
 };
 
 const FolderDetailView = ({ data: _data }: Params) => {
-  const { data, error, showError, closeError, addNewDataRetrieval } = useFolderDetailViewModel({ data: _data });
-  const { folder, user } = data;
+  const { data, error, showError, closeError, addNewDataRetrieval, newDataRetrievalIds } = useFolderDetailViewModel({ data: _data });
+  const { folder, user, prefilledData } = data;
 
   if (!folder) {
     return (
@@ -52,7 +54,13 @@ const FolderDetailView = ({ data: _data }: Params) => {
           <section>
             <h2 className="text-xl font-semibold text-gray-700 mb-4">Consulta de Datos</h2>
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <DataRetrievalSection folder={folder} user={user} addNewDataRetrieval={addNewDataRetrieval} />
+              <DataRetrievalSection 
+                folder={folder} 
+                user={user} 
+                prefilledData={prefilledData} 
+                addNewDataRetrieval={addNewDataRetrieval}
+                newDataRetrievalIds={newDataRetrievalIds}
+              />
             </div>
           </section>
         </div>

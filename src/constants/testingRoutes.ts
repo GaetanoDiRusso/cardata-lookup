@@ -1,3 +1,5 @@
+import { IS_PRODUCTION } from '@/server/config';
+
 export const TESTING_BASE_PATH = '/api/testing';
 export const TESTING_API_PATH = `${TESTING_BASE_PATH}`;
 
@@ -9,5 +11,5 @@ export const TESTING_ROUTES = [
 
 // Check if testing routes should be available
 export const isTestingEnabled = () => {
-  return process.env.NODE_ENV !== 'production';
+  return !IS_PRODUCTION;
 }; 

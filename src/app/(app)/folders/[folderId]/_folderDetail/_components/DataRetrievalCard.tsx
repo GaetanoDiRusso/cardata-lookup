@@ -6,6 +6,7 @@ import {
   SolicitarCertificadoCard,
   CertificadoSuciveCard
 } from './DataRetrievalCard/index';
+import { SolicitarCertificadoFormData } from '@/server/domain/entities/SolicitarCertificadoFormData';
 
 export type DataRetrievalCardProps = {
   folderId: string;
@@ -14,7 +15,9 @@ export type DataRetrievalCardProps = {
   description: string;
   existingRetrievals: PVehicleDataRetrieval[];
   user?: DefaultSession['user'];
+  prefilledData?: SolicitarCertificadoFormData;
   addNewDataRetrieval: (dataRetrieval: PVehicleDataRetrieval) => void;
+  newDataRetrievalIds: Set<string>;
 }
 
 export const DataRetrievalCard = ({ 
@@ -24,7 +27,9 @@ export const DataRetrievalCard = ({
   description, 
   existingRetrievals,
   user,
+  prefilledData,
   addNewDataRetrieval,
+  newDataRetrievalIds,
 }: DataRetrievalCardProps) => {
   const [isCardCollapsed, setIsCardCollapsed] = useState(true);
 
@@ -44,6 +49,7 @@ export const DataRetrievalCard = ({
           isCardCollapsed={isCardCollapsed}
           onToggleCollapse={() => setIsCardCollapsed(!isCardCollapsed)}
           addNewDataRetrieval={addNewDataRetrieval}
+          newDataRetrievalIds={newDataRetrievalIds}
         />
       );
 
@@ -56,9 +62,11 @@ export const DataRetrievalCard = ({
           description={description}
           existingRetrievals={existingRetrievals}
           user={user}
+          prefilledData={prefilledData}
           isCardCollapsed={isCardCollapsed}
           onToggleCollapse={() => setIsCardCollapsed(!isCardCollapsed)}
           addNewDataRetrieval={addNewDataRetrieval}
+          newDataRetrievalIds={newDataRetrievalIds}
         />
       );
 
@@ -73,6 +81,7 @@ export const DataRetrievalCard = ({
           isCardCollapsed={isCardCollapsed}
           onToggleCollapse={() => setIsCardCollapsed(!isCardCollapsed)}
           addNewDataRetrieval={addNewDataRetrieval}
+          newDataRetrievalIds={newDataRetrievalIds}
         />
       );
 

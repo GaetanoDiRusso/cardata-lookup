@@ -1,4 +1,5 @@
 import { VehicleDataRetrieval, VehicleDataRetrievalPrev } from '../../entities/VehicleDataRetrieval';
+import { SolicitarCertificadoFormData } from '../../entities/SolicitarCertificadoFormData';
 import { IVehicleDataRetrievalRepository, ICreateVehicleDataRetrievalData, IUpdateVehicleDataRetrievalData } from '../../interfaces/IVehicleDataRetrievalRepository';
 import { VehicleDataRetrievalType, VehicleDataRetrievalStatus } from '@/models/PScrapingResult';
 import { ICurrentUserContext } from '../../interfaces/ICurrentUserContext';
@@ -136,6 +137,44 @@ export class VehicleDataRetrievalUseCases {
 
   async findVehicleDataRetrievalsPrevByFolderId(params: FindVehicleDataRetrievalsPrevByFolderIdParams, userContext: ICurrentUserContext): Promise<VehicleDataRetrievalPrev[]> {
     return await this.vehicleDataRetrievalRepository.findAllPrevByFolderId(params.folderId);
+  }
+
+  async findLatestByTypeAndUser(dataRetrievalType: VehicleDataRetrievalType, userContext: ICurrentUserContext): Promise<VehicleDataRetrieval | null> {
+    return await this.vehicleDataRetrievalRepository.findLatestByTypeAndUser(dataRetrievalType, userContext.userId);
+  }
+
+  async getPrefilledSolicitarCertificadoData(
+    userContext: ICurrentUserContext,
+    userSessionData: { name?: string | null; email?: string | null }
+  ): Promise<SolicitarCertificadoFormData> {
+    // Get the latest solicitar_certificado retrieval for this user
+    const latestRetrieval = await this.findLatestByTypeAndUser('solicitar_certificado', userContext);
+
+    // Default values from user session
+    const defaultData = {
+      fullName: userSessionData.name || '',
+      identificationType: 'CI' as const,
+      identificationNumber: '',
+      email: userSessionData.email || '',
+      phoneNumber: '',
+      address: '',
+    };
+
+    // If we have a previous retrieval, use its requester data
+    if (latestRetrieval && latestRetrieval.data?.requesterData) {
+      const requesterData = latestRetrieval.data.requesterData;
+      return {
+        fullName: requesterData.fullName || defaultData.fullName,
+        identificationType: requesterData.identificationType || defaultData.identificationType,
+        identificationNumber: requesterData.identificationNumber || defaultData.identificationNumber,
+        email: requesterData.email || defaultData.email,
+        phoneNumber: requesterData.phoneNumber || defaultData.phoneNumber,
+        address: requesterData.address || defaultData.address,
+      };
+    }
+
+    // Return default data if no previous retrieval
+    return defaultData;
   }
 
   // Update operations

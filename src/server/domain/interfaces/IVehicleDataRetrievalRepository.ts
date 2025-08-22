@@ -33,6 +33,7 @@ export interface IVehicleDataRetrievalRepository {
   findByFolderIdAndType(folderId: string, dataRetrievalType: VehicleDataRetrievalType): Promise<VehicleDataRetrieval | null>;
   findAllByFolderId(folderId: string): Promise<VehicleDataRetrieval[]>;
   findAllPrevByFolderId(folderId: string): Promise<VehicleDataRetrievalPrev[]>;
+  findLatestByTypeAndUser(dataRetrievalType: VehicleDataRetrievalType, userId: string): Promise<VehicleDataRetrieval | null>;
   
   // Update operations
   update(id: string, data: IUpdateVehicleDataRetrievalData): Promise<VehicleDataRetrieval>;
